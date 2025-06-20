@@ -386,7 +386,7 @@
         
         <div class="info-box">
             <h3>✅ Smart Account Selection</h3>
-            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. It uses the "Date due" column from your Excel file and intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards.</p>
+            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. It uses the "Date due" column from your Excel file and intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. The converter also properly handles credit notes with negative VAT values.</p>
         </div>
         
         <!-- Step 1: Upload File -->
@@ -885,6 +885,10 @@
                 const customerCode = settings.includeCustomers ? 
                     settings.customerCodePrefix + (index + 1).toString().padStart(3, '0') : '';
                 
+                // Check if this is a credit note
+                const isCreditNote = row['Type'] && row['Type'].toString().toLowerCase().includes('credit');
+                const documentPrefix = isCreditNote ? 'Credit note' : 'Invoice';
+                
                 // Get customer country and determine accounts
                 const customerCountry = getCustomerCountry(row, settings.countryColumn);
                 const countryType = classifyCountry(customerCountry, settings.homeCountry);
@@ -895,6 +899,7 @@
                     console.log('Account selection for first record:');
                     console.log('Customer country:', customerCountry);
                     console.log('Country type:', countryType);
+                    console.log('Document type:', isCreditNote ? 'Credit Note' : 'Invoice');
                     console.log('Selected accounts:');
                     console.log('  Receivables:', accounts.receivables);
                     console.log('  Revenue:', accounts.revenue);
@@ -907,7 +912,7 @@
                 xml += '      <GlavaTemeljnice>\n';
                 xml += `        <SifraVrsteTemeljnice>${escapeXml(settings.invoiceType)}</SifraVrsteTemeljnice>\n`;
                 xml += `        <DatumTemeljnice>${formatDate(row['Date'])}</DatumTemeljnice>\n`;
-                xml += `        <OpisGlaveTemeljnice>${escapeXml(row['Number'] || 'Invoice ' + (index + 1))}</OpisGlaveTemeljnice>\n`;
+                xml += `        <OpisGlaveTemeljnice>${escapeXml(row['Number'] || documentPrefix + ' ' + (index + 1))}</OpisGlaveTemeljnice>\n`;
                 xml += '      </GlavaTemeljnice>\n';
                 
                 // VrsticeTemeljnice section (correct structure from schema)
@@ -927,7 +932,7 @@
                 
                 // Receivables entry (debit) - following exact schema sequence
                 xml += '        <VrsticaTemeljnice>\n';
-                xml += `          <OpisVrsticeTemeljnice>Invoice ${escapeXml(row['Number'] || '')} - ${escapeXml(row['Name'] || '')}</OpisVrsticeTemeljnice>\n`;
+                xml += `          <OpisVrsticeTemeljnice>${documentPrefix} ${escapeXml(row['Number'] || '')} - ${escapeXml(row['Name'] || '')}</OpisVrsticeTemeljnice>\n`;
                 xml += `          <SifraKonta>${escapeXml(accounts.receivables)}</SifraKonta>\n`;
                 if (customerCode) {
                     xml += `          <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
@@ -950,7 +955,9 @@
                 xml += '        </VrsticaTemeljnice>\n';
                 
                 // VAT entry if applicable (credit) - following exact schema sequence
-                if (taxAmount > 0 && accounts.vat) {
+                // For credit notes, taxAmount will be negative if there's VAT
+                // The condition checks if there's any VAT (positive or negative) and if VAT account exists
+                if (Math.abs(taxAmount) > 0.001 && accounts.vat) {
                     xml += '        <VrsticaTemeljnice>\n';
                     xml += `          <OpisVrsticeTemeljnice>VAT - ${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
                     xml += `          <SifraKonta>${escapeXml(accounts.vat)}</SifraKonta>\n`;
