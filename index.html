@@ -385,8 +385,8 @@
         </div>
         
         <div class="info-box">
-            <h3>✅ Smart Account Selection</h3>
-            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. It uses the "Date due" column from your Excel file and intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. The converter also properly handles credit notes with negative VAT values.</p>
+            <h3>✅ Smart Account Selection & VAT Book Integration</h3>
+            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. It uses the "Date due" column from your Excel file and intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. The converter also properly handles credit notes with negative VAT values and includes DDV (VAT) segments for the VAT book.</p>
         </div>
         
         <!-- Step 1: Upload File -->
@@ -409,8 +409,9 @@
                 <div class="setting-item">
                     <label for="defaultInvoiceType">Document Type</label>
                     <select id="defaultInvoiceType">
-                        <option value="IR">IR - Issued Invoice (Izdani Račun)</option>
+                        <option value="IR" selected>IR - Issued Invoice (Izdani Račun)</option>
                         <option value="PR">PR - Received Invoice (Prejeti Račun)</option>
+                        <option value="DI">DI - Daily Cash Register (Dnevni Iztržek)</option>
                         <option value="FT">FT - Financial Document</option>
                     </select>
                 </div>
@@ -455,6 +456,23 @@
                         <option value="Shipping Country">Shipping Country</option>
                         <option value="Billing Country">Billing Country</option>
                     </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="defaultVATRate">Default VAT Rate</label>
+                    <select id="defaultVATRate">
+                        <option value="S">S - Standard rate 22%</option>
+                        <option value="Z">Z - Reduced rate 9.5%</option>
+                        <option value="P">P - Special rate 5%</option>
+                        <option value="0">0 - Zero rate 0%</option>
+                        <option value="OP">OP - Exempt</option>
+                        <option value="NE">NE - Not subject to VAT</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="vatRateColumn">VAT Rate Column (Optional)</label>
+                    <input type="text" id="vatRateColumn" placeholder="e.g., VAT Rate, Tax Rate">
                 </div>
             </div>
             
@@ -793,7 +811,7 @@
                         document.getElementById('previewToggle').classList.remove('hidden');
                         document.getElementById('downloadInfo').classList.remove('hidden');
                         
-                        showMessage(`🎉 XML generated successfully! Created ${invoiceData.length} invoice records (${(generatedXML.length / 1024).toFixed(1)} KB)`, 'success');
+                        showMessage(`🎉 XML generated successfully! Created ${invoiceData.length} issued invoice (IR) records with VAT book entries (${(generatedXML.length / 1024).toFixed(1)} KB)`, 'success');
                         
                     } catch (error) {
                         hideProcessing();
@@ -816,7 +834,9 @@
                 includeCustomers: document.getElementById('includeCustomers').value === 'true',
                 customerCodePrefix: document.getElementById('customerCodePrefix').value || 'CUST',
                 homeCountry: document.getElementById('homeCountry').value,
-                countryColumn: document.getElementById('countryColumn').value
+                countryColumn: document.getElementById('countryColumn').value,
+                defaultVATRate: document.getElementById('defaultVATRate').value || 'S',
+                vatRateColumn: document.getElementById('vatRateColumn').value.trim()
             };
             
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -904,6 +924,7 @@
                     console.log('  Receivables:', accounts.receivables);
                     console.log('  Revenue:', accounts.revenue);
                     console.log('  VAT:', accounts.vat || 'No VAT');
+                    console.log('DDV segment:', Math.abs(taxAmount) > 0.001 && accounts.vat && countryType !== 'third' ? 'Will be included' : 'Not included');
                 }
                 
                 xml += '    <Temeljnica>\n';
@@ -914,6 +935,72 @@
                 xml += `        <DatumTemeljnice>${formatDate(row['Date'])}</DatumTemeljnice>\n`;
                 xml += `        <OpisGlaveTemeljnice>${escapeXml(row['Number'] || documentPrefix + ' ' + (index + 1))}</OpisGlaveTemeljnice>\n`;
                 xml += '      </GlavaTemeljnice>\n';
+                
+                // DDV section for VAT book entries (only for invoices with VAT)
+                if (Math.abs(taxAmount) > 0.001 && accounts.vat && countryType !== 'third') {
+                    xml += '      <DDV>\n';
+                    xml += '        <DDVVrstica>\n';
+                    xml += '          <DDVGlava>\n';
+                    xml += `            <DatumDDV>${formatDate(row['Date'])}</DatumDDV>\n`;
+                    xml += '            <KnjigaDDV>IR</KnjigaDDV>\n'; // IR = Issued invoices book
+                    xml += `            <DatumKnjizenjaDDV>${formatDate(row['Date'])}</DatumKnjizenjaDDV>\n`;
+                    if (customerCode) {
+                        xml += `            <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
+                    }
+                    xml += `            <Listina>${escapeXml(row['Number'] || documentPrefix + ' ' + (index + 1))}</Listina>\n`;
+                    xml += `            <VrstaRacuna>${isCreditNote ? 'D' : 'R'}</VrstaRacuna>\n`; // D=Dobropis (Credit note), R=Račun (Invoice)
+                    xml += `            <DatumListine>${formatDate(row['Date'])}</DatumListine>\n`;
+                    if (row['Date due']) {
+                        xml += `            <DatumPlacila>${formatDate(row['Date due'])}</DatumPlacila>\n`;
+                    }
+                    xml += `            <DatumOpravljanja>${formatDate(row['Date'])}</DatumOpravljanja>\n`;
+                    // Add Storno flag for credit notes
+                    if (isCreditNote) {
+                        xml += '            <Storno>D</Storno>\n';
+                    }
+                    xml += '          </DDVGlava>\n';
+                    xml += '          <DDVStopnje>\n';
+                    xml += '            <DDVStopnja>\n';
+                    
+                    // Determine VAT rate code
+                    let vatRateCode = settings.defaultVATRate;
+                    
+                    // Check if there's a VAT rate column in the data
+                    if (settings.vatRateColumn && row[settings.vatRateColumn]) {
+                        const rowVatRate = row[settings.vatRateColumn].toString().toUpperCase();
+                        // Map common values to VAT rate codes
+                        if (rowVatRate === 'S' || rowVatRate.includes('22') || rowVatRate.includes('STANDARD')) {
+                            vatRateCode = 'S';
+                        } else if (rowVatRate === 'Z' || rowVatRate.includes('9.5') || rowVatRate.includes('REDUCED')) {
+                            vatRateCode = 'Z';
+                        } else if (rowVatRate === 'P' || rowVatRate.includes('5') || rowVatRate.includes('SPECIAL')) {
+                            vatRateCode = 'P';
+                        } else if (rowVatRate === '0' || rowVatRate.includes('ZERO')) {
+                            vatRateCode = '0';
+                        } else if (rowVatRate === 'OP' || rowVatRate.includes('EXEMPT')) {
+                            vatRateCode = 'OP';
+                        } else if (rowVatRate === 'NE' || rowVatRate.includes('NOT SUBJECT')) {
+                            vatRateCode = 'NE';
+                        }
+                    }
+                    
+                    xml += `              <SifraStopnjeDDV>${vatRateCode}</SifraStopnjeDDV>\n`;
+                    
+                    // For services vs goods, use appropriate fields
+                    // Note: DDV book typically shows absolute values
+                    if (settings.businessType === 'services') {
+                        xml += `              <StoritevOsnova>${Math.abs(netAmount).toFixed(2)}</StoritevOsnova>\n`;
+                        xml += `              <StoritevDDV>${Math.abs(taxAmount).toFixed(2)}</StoritevDDV>\n`;
+                    } else {
+                        xml += `              <Osnova>${Math.abs(netAmount).toFixed(2)}</Osnova>\n`;
+                        xml += `              <DDV>${Math.abs(taxAmount).toFixed(2)}</DDV>\n`;
+                    }
+                    
+                    xml += '            </DDVStopnja>\n';
+                    xml += '          </DDVStopnje>\n';
+                    xml += '        </DDVVrstica>\n';
+                    xml += '      </DDV>\n';
+                }
                 
                 // VrsticeTemeljnice section (correct structure from schema)
                 xml += '      <VrsticeTemeljnice>\n';
