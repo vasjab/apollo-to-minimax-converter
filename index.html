@@ -1190,12 +1190,6 @@
                     }
                     xml += `            <Listina>${escapeXml(row['Number'] || 'IR:' + formatDate(row['Date']) + '-' + (index + 1))}</Listina>\n`;
                     xml += `            <DatumListine>${formatDate(row['Date'])}</DatumListine>\n`;
-                    
-                    // OSS indicator for EU countries (non-domestic)
-                    if (countryType === 'eu') {
-                        xml += '            <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n';
-                    }
-                    
                     xml += '          </DDVGlava>\n';
                     xml += '          <DDVStopnje>\n';
                     xml += '            <DDVStopnja>\n';
