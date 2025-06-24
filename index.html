@@ -937,27 +937,19 @@
                 xml += '      </GlavaTemeljnice>\n';
                 
                 // DDV section for VAT book entries (only for invoices with VAT)
-                if (Math.abs(taxAmount) > 0.001 && accounts.vat && countryType !== 'third') {
+                // This section must be included for the DDV book to appear in Minimax
+                if (Math.abs(taxAmount) > 0.001 && accounts.vat && countryType !== 'third' && settings.invoiceType === 'IR') {
                     xml += '      <DDV>\n';
                     xml += '        <DDVVrstica>\n';
                     xml += '          <DDVGlava>\n';
                     xml += `            <DatumDDV>${formatDate(row['Date'])}</DatumDDV>\n`;
-                    xml += '            <KnjigaDDV>IR</KnjigaDDV>\n'; // IR = Issued invoices book
+                    xml += '            <KnjigaDDV>IR</KnjigaDDV>\n'; // IR = Knjiga izdanih računov
                     xml += `            <DatumKnjizenjaDDV>${formatDate(row['Date'])}</DatumKnjizenjaDDV>\n`;
                     if (customerCode) {
                         xml += `            <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
                     }
-                    xml += `            <Listina>${escapeXml(row['Number'] || documentPrefix + ' ' + (index + 1))}</Listina>\n`;
-                    xml += `            <VrstaRacuna>${isCreditNote ? 'D' : 'R'}</VrstaRacuna>\n`; // D=Dobropis (Credit note), R=Račun (Invoice)
+                    xml += `            <Listina>${escapeXml(row['Number'] || 'IR:' + formatDate(row['Date']) + '-' + (index + 1))}</Listina>\n`;
                     xml += `            <DatumListine>${formatDate(row['Date'])}</DatumListine>\n`;
-                    if (row['Date due']) {
-                        xml += `            <DatumPlacila>${formatDate(row['Date due'])}</DatumPlacila>\n`;
-                    }
-                    xml += `            <DatumOpravljanja>${formatDate(row['Date'])}</DatumOpravljanja>\n`;
-                    // Add Storno flag for credit notes
-                    if (isCreditNote) {
-                        xml += '            <Storno>D</Storno>\n';
-                    }
                     xml += '          </DDVGlava>\n';
                     xml += '          <DDVStopnje>\n';
                     xml += '            <DDVStopnja>\n';
@@ -987,7 +979,6 @@
                     xml += `              <SifraStopnjeDDV>${vatRateCode}</SifraStopnjeDDV>\n`;
                     
                     // For services vs goods, use appropriate fields
-                    // Note: DDV book typically shows absolute values
                     if (settings.businessType === 'services') {
                         xml += `              <StoritevOsnova>${Math.abs(netAmount).toFixed(2)}</StoritevOsnova>\n`;
                         xml += `              <StoritevDDV>${Math.abs(taxAmount).toFixed(2)}</StoritevDDV>\n`;
