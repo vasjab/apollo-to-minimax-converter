@@ -383,7 +383,7 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.2</strong> | Last updated: December 2024 | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Hash-based Customer Codes</span>
+                <strong>Version 2.2</strong> | Last updated: December 2024 | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Hash-based Customer Codes</span> | <span style="color: #48bb78;">✓ OSS Support</span>
             </div>
         </div>
         
@@ -395,6 +395,7 @@
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
                     <li><strong>Hash-based customer codes</strong> - Same customer name always generates the same 8-character code, preventing duplicates</li>
                     <li>Full DDV book support - Each invoice with VAT includes proper VAT book entries</li>
+                    <li><strong>OSS support for EU countries</strong> - Automatic OSS indicator for intra-EU transactions</li>
                     <li>Smart customer code generation - Multiple methods to prevent duplicates</li>
                     <li>Credit note detection from "Type" column with proper negative VAT handling</li>
                 </ul>
@@ -536,7 +537,7 @@
                     </div>
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #4299e1;">
                         <strong>🇪🇺 EU Countries</strong><br>
-                        <small id="euPreview">Receivables: 1211 | Revenue: 76101 | VAT: 26071 (OSS)</small>
+                        <small id="euPreview">Receivables: 1211 | Revenue: 76101 | VAT: 26071 (OSS Required)</small>
                     </div>
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #ed8936;">
                         <strong>🌍 Third Countries</strong><br>
@@ -624,12 +625,13 @@
         
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.2</strong> | Features: IR Journal Entries + DDV Book Segment + Credit Note Support + Hash-based Customer Codes<br>
+                <strong>Minimax XML Converter v2.2</strong> | Features: IR Journal Entries + DDV Book Segment + Credit Note Support + Hash-based Customer Codes + OSS Support<br>
                 <span style="color: #48bb78;">✓</span> Issued Invoice (IR) support | 
                 <span style="color: #48bb78;">✓</span> DDV/VAT book entries | 
                 <span style="color: #48bb78;">✓</span> Credit notes with negative VAT | 
                 <span style="color: #48bb78;">✓</span> Smart country detection |
-                <span style="color: #48bb78;">✓</span> Hash-based duplicate prevention
+                <span style="color: #48bb78;">✓</span> Hash-based duplicate prevention |
+                <span style="color: #48bb78;">✓</span> OSS for EU transactions
             </p>
         </div>
     </div>
@@ -637,7 +639,7 @@
     <script>
         // Version information
         console.log('Minimax XML Converter v2.2 loaded');
-        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes');
+        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, OSS Support');
         console.log('Last updated: December 2024');
         
         // Simple hash function to create consistent short codes
@@ -673,7 +675,7 @@
         
         // Show version notification on load
         window.addEventListener('DOMContentLoaded', function() {
-            showMessage('✅ Minimax XML Converter v2.2 loaded - DDV Book Support + Hash-based Customer Codes', 'info');
+            showMessage('✅ Minimax XML Converter v2.2 loaded - DDV Book Support + Hash-based Customer Codes + OSS Support', 'info');
             
             // Test hash function examples
             console.log('Hash function examples (same name always produces same code):');
@@ -934,7 +936,16 @@
                         // Count how many invoices have DDV segments
                         let ddvCount = 0;
                         let vatInvoicesCount = 0;
-                        data.forEach(row => {
+                        let ossCount = 0;
+                        
+                        const settings = {
+                            invoiceType: document.getElementById('defaultInvoiceType').value,
+                            homeCountry: document.getElementById('homeCountry').value,
+                            countryColumn: document.getElementById('countryColumn').value,
+                            includeCustomers: document.getElementById('includeCustomers').value === 'true'
+                        };
+                        
+                        invoiceData.forEach(row => {
                             const netAmount = parseFloat(row['Total'] || 0);
                             const grossAmount = parseFloat(row['Total w/ tax'] || netAmount);
                             const taxAmount = grossAmount - netAmount;
@@ -945,6 +956,9 @@
                                 vatInvoicesCount++;
                                 if (settings.invoiceType === 'IR') {
                                     ddvCount++;
+                                    if (countryType === 'eu') {
+                                        ossCount++;
+                                    }
                                 }
                             }
                         });
@@ -953,7 +967,7 @@
                         
                         if (settings.includeCustomers) {
                             const uniqueCustomers = new Map();
-                            data.forEach(row => {
+                            invoiceData.forEach(row => {
                                 if (row['Name']) uniqueCustomers.set(row['Name'], true);
                             });
                             message += ` with ${uniqueCustomers.size} unique customers`;
@@ -963,6 +977,9 @@
                         
                         if (settings.invoiceType === 'IR' && ddvCount > 0) {
                             message += ` and ${ddvCount} DDV book entries`;
+                            if (ossCount > 0) {
+                                message += ` (${ossCount} with OSS)`;
+                            }
                         } else if (settings.invoiceType !== 'IR' && vatInvoicesCount > 0) {
                             message += ` (Note: DDV segments only included for IR type)`;
                         }
@@ -1044,7 +1061,7 @@
             }
             
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            xml += '<!-- Generated by Minimax XML Converter v2.2 - Includes DDV Book Support + Hash-based Customer Codes -->\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.2 - Includes DDV Book Support + Hash-based Customer Codes + OSS Support -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
@@ -1146,6 +1163,7 @@
                     console.log('  Revenue:', accounts.revenue);
                     console.log('  VAT:', accounts.vat || 'No VAT');
                     console.log('DDV segment:', Math.abs(taxAmount) > 0.001 && accounts.vat && countryType !== 'third' && settings.invoiceType === 'IR' ? 'Will be included' : 'Not included');
+                    console.log('OSS required:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Yes' : 'No');
                     console.log('==========================================');
                 }
                 
@@ -1172,6 +1190,12 @@
                     }
                     xml += `            <Listina>${escapeXml(row['Number'] || 'IR:' + formatDate(row['Date']) + '-' + (index + 1))}</Listina>\n`;
                     xml += `            <DatumListine>${formatDate(row['Date'])}</DatumListine>\n`;
+                    
+                    // OSS indicator for EU countries (non-domestic)
+                    if (countryType === 'eu') {
+                        xml += '            <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n';
+                    }
+                    
                     xml += '          </DDVGlava>\n';
                     xml += '          <DDVStopnje>\n';
                     xml += '            <DDVStopnja>\n';
@@ -1434,7 +1458,7 @@
                 `Receivables: ${domesticAccounts.receivables} | Revenue: ${domesticAccounts.revenue} | VAT: ${domesticAccounts.vat}`;
             
             document.getElementById('euPreview').textContent = 
-                `Receivables: ${euAccounts.receivables} | Revenue: ${euAccounts.revenue} | VAT: ${euAccounts.vat} (OSS)`;
+                `Receivables: ${euAccounts.receivables} | Revenue: ${euAccounts.revenue} | VAT: ${euAccounts.vat} (OSS Required)`;
             
             document.getElementById('thirdPreview').textContent = 
                 `Receivables: ${thirdAccounts.receivables} | Revenue: ${thirdAccounts.revenue} | VAT: ${thirdAccounts.vat || 'No VAT'}`;
