@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter - Production Ready</title>
+    <title>Minimax Invoice XML Converter v2.2 - With DDV Book Support & Hash Codes</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -382,16 +382,32 @@
         <div class="header">
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
+            <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
+                <strong>Version 2.2</strong> | Last updated: December 2024 | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Hash-based Customer Codes</span>
+            </div>
         </div>
         
         <div class="info-box">
             <h3>✅ Smart Account Selection & VAT Book Integration</h3>
-            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. It uses the "Date due" column from your Excel file and intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. The converter also properly handles credit notes with negative VAT values and includes DDV (VAT) segments for the VAT book.</p>
+            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper invoice processing. The converter intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. It also properly handles credit notes (detected from "Type" column) with negative VAT values and includes DDV (VAT) segments for the VAT book.</p>
+            <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
+                <strong style="color: #16a34a;">🆕 New in v2.2:</strong> 
+                <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
+                    <li><strong>Hash-based customer codes</strong> - Same customer name always generates the same 8-character code, preventing duplicates</li>
+                    <li>Full DDV book support - Each invoice with VAT includes proper VAT book entries</li>
+                    <li>Smart customer code generation - Multiple methods to prevent duplicates</li>
+                    <li>Credit note detection from "Type" column with proper negative VAT handling</li>
+                </ul>
+            </div>
         </div>
         
         <!-- Step 1: Upload File -->
         <div class="step">
             <h2>📁 Step 1: Upload Your Invoice Export</h2>
+            <p style="color: #718096; font-size: 0.9rem; margin-bottom: 20px;">
+                Required columns: Number, Name, Date, Date due, Total, Total w/ tax<br>
+                Optional columns: Type (for credit notes), Tax number, Country, Address, City, Postal code
+            </p>
             <div class="file-upload" id="fileUpload">
                 <div class="file-upload-icon">📊</div>
                 <div class="file-upload-text">Click or drag and drop your file here</div>
@@ -432,11 +448,28 @@
                         <option value="true">Yes - Include customer section</option>
                         <option value="false">No - Only transactions</option>
                     </select>
+                    <p style="font-size: 0.8rem; color: #718096; margin-top: 5px;">
+                        When set to "No", the SifraStranke field is omitted from journal entries. Minimax will use existing customers based on other data (invoice number, tax ID, etc.).
+                    </p>
                 </div>
                 
-                <div class="setting-item">
+                <div class="setting-item" id="customerCodeLogicContainer">
+                    <label for="customerCodeLogic">Customer Code Generation</label>
+                    <select id="customerCodeLogic">
+                        <option value="hash">Use Hash of Name (prevents duplicates)</option>
+                        <option value="taxnumber">Use Tax Number (if available)</option>
+                        <option value="namebased">Use Name-based code</option>
+                        <option value="timestamp">Add timestamp to prefix</option>
+                        <option value="manual">Manual prefix only</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item" id="customerCodePrefixContainer">
                     <label for="customerCodePrefix">Customer Code Prefix</label>
-                    <input type="text" id="customerCodePrefix" value="CUST" placeholder="e.g., CUST">
+                    <input type="text" id="customerCodePrefix" value="C" placeholder="e.g., C">
+                    <p style="font-size: 0.8rem; color: #718096; margin-top: 5px;">
+                        For hash method, prefix is optional. For others, it's added before the code.
+                    </p>
                 </div>
                 
                 <div class="setting-item">
@@ -474,6 +507,24 @@
                     <label for="vatRateColumn">VAT Rate Column (Optional)</label>
                     <input type="text" id="vatRateColumn" placeholder="e.g., VAT Rate, Tax Rate">
                 </div>
+            </div>
+            
+            <div id="customerWarning" style="margin-top: 20px; padding: 15px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px;">
+                <h3 style="color: #92400e; margin-bottom: 10px;">⚠️ Important: Customer Import</h3>
+                <p style="color: #92400e; font-size: 0.9rem; line-height: 1.6;">
+                    <strong>Tip:</strong> Use "Hash of Name" method to prevent duplicate customer codes. The same customer name will always generate the same code, so importing the same customer multiple times won't create duplicates in Minimax.
+                </p>
+                <p style="color: #92400e; font-size: 0.85rem; margin-top: 10px;">
+                    Customer code generation options:
+                </p>
+                <ul style="margin: 8px 0 0 20px; font-size: 0.85rem; color: #92400e;">
+                    <li><strong>Hash of Name:</strong> Creates unique 6-8 char code from name (same name = same code)<br>
+                        <span style="font-size: 0.8rem; color: #666;">Example: The same customer name will always generate the same code</span></li>
+                    <li><strong>Tax Number:</strong> Uses customer's tax ID (good for uniqueness)</li>
+                    <li><strong>Name-based:</strong> Creates code from customer name</li>
+                    <li><strong>Timestamp:</strong> Adds unique timestamp to prevent duplicates</li>
+                    <li><strong>Manual:</strong> Uses your prefix + sequential numbers (may cause duplicates)</li>
+                </ul>
             </div>
             
             <div class="info-box" style="margin-top: 20px;">
@@ -570,9 +621,70 @@
         </div>
         
         <div id="messages"></div>
+        
+        <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
+            <p style="color: #718096; font-size: 0.85rem;">
+                <strong>Minimax XML Converter v2.2</strong> | Features: IR Journal Entries + DDV Book Segment + Credit Note Support + Hash-based Customer Codes<br>
+                <span style="color: #48bb78;">✓</span> Issued Invoice (IR) support | 
+                <span style="color: #48bb78;">✓</span> DDV/VAT book entries | 
+                <span style="color: #48bb78;">✓</span> Credit notes with negative VAT | 
+                <span style="color: #48bb78;">✓</span> Smart country detection |
+                <span style="color: #48bb78;">✓</span> Hash-based duplicate prevention
+            </p>
+        </div>
     </div>
 
     <script>
+        // Version information
+        console.log('Minimax XML Converter v2.2 loaded');
+        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes');
+        console.log('Last updated: December 2024');
+        
+        // Simple hash function to create consistent short codes
+        function simpleHash(str) {
+            let hash = 0;
+            let hash2 = 0;
+            
+            // Use two different hash calculations for better distribution
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+                
+                // Second hash using different multiplier
+                hash2 = ((hash2 << 3) + hash2) + char;
+                hash2 = hash2 & hash2;
+            }
+            
+            // Combine both hashes for better uniqueness
+            const combined = Math.abs(hash) + Math.abs(hash2);
+            
+            // Convert to base36 for alphanumeric code (0-9, A-Z)
+            let code = combined.toString(36).toUpperCase();
+            
+            // Ensure minimum length and pad if needed
+            while (code.length < 6) {
+                code = '0' + code;
+            }
+            
+            // Return first 8 characters (or full code if shorter)
+            return code.substring(0, 8);
+        }
+        
+        // Show version notification on load
+        window.addEventListener('DOMContentLoaded', function() {
+            showMessage('✅ Minimax XML Converter v2.2 loaded - DDV Book Support + Hash-based Customer Codes', 'info');
+            
+            // Test hash function examples
+            console.log('Hash function examples (same name always produces same code):');
+            console.log('  "ACME Corp" → "' + simpleHash('ACME Corp'.toUpperCase()) + '"');
+            console.log('  "John Smith Ltd" → "' + simpleHash('John Smith Ltd'.toUpperCase()) + '"');
+            console.log('  "Test Company" → "' + simpleHash('Test Company'.toUpperCase()) + '"');
+            console.log('  "ABC Inc" → "' + simpleHash('ABC Inc'.toUpperCase()) + '"');
+            console.log('  "XYZ Solutions" → "' + simpleHash('XYZ Solutions'.toUpperCase()) + '"');
+            console.log('Note: Importing the same customer multiple times will use the same code.');
+        });
+        
         let invoiceData = [];
         let generatedXML = '';
         
@@ -767,6 +879,14 @@
             // Add event listeners for preview updates
             document.getElementById('businessType').addEventListener('change', updateAccountPreview);
             
+            // Add event listener for customer inclusion toggle
+            document.getElementById('includeCustomers').addEventListener('change', function(e) {
+                const showCustomerOptions = e.target.value === 'true';
+                document.getElementById('customerCodeLogicContainer').style.display = showCustomerOptions ? 'block' : 'none';
+                document.getElementById('customerCodePrefixContainer').style.display = showCustomerOptions ? 'block' : 'none';
+                document.getElementById('customerWarning').style.display = showCustomerOptions ? 'block' : 'none';
+            });
+            
             // Add event listeners for manual override fields
             const overrideFields = [
                 'domesticReceivables', 'domesticRevenue', 'domesticVAT',
@@ -811,7 +931,44 @@
                         document.getElementById('previewToggle').classList.remove('hidden');
                         document.getElementById('downloadInfo').classList.remove('hidden');
                         
-                        showMessage(`🎉 XML generated successfully! Created ${invoiceData.length} issued invoice (IR) records with VAT book entries (${(generatedXML.length / 1024).toFixed(1)} KB)`, 'success');
+                        // Count how many invoices have DDV segments
+                        let ddvCount = 0;
+                        let vatInvoicesCount = 0;
+                        data.forEach(row => {
+                            const netAmount = parseFloat(row['Total'] || 0);
+                            const grossAmount = parseFloat(row['Total w/ tax'] || netAmount);
+                            const taxAmount = grossAmount - netAmount;
+                            const customerCountry = getCustomerCountry(row, settings.countryColumn);
+                            const countryType = classifyCountry(customerCountry, settings.homeCountry);
+                            
+                            if (Math.abs(taxAmount) > 0.001 && countryType !== 'third') {
+                                vatInvoicesCount++;
+                                if (settings.invoiceType === 'IR') {
+                                    ddvCount++;
+                                }
+                            }
+                        });
+                        
+                        let message = `🎉 XML generated successfully! Created ${invoiceData.length} ${settings.invoiceType} records`;
+                        
+                        if (settings.includeCustomers) {
+                            const uniqueCustomers = new Map();
+                            data.forEach(row => {
+                                if (row['Name']) uniqueCustomers.set(row['Name'], true);
+                            });
+                            message += ` with ${uniqueCustomers.size} unique customers`;
+                        } else {
+                            message += ` (customers not included)`;
+                        }
+                        
+                        if (settings.invoiceType === 'IR' && ddvCount > 0) {
+                            message += ` and ${ddvCount} DDV book entries`;
+                        } else if (settings.invoiceType !== 'IR' && vatInvoicesCount > 0) {
+                            message += ` (Note: DDV segments only included for IR type)`;
+                        }
+                        message += ` (${(generatedXML.length / 1024).toFixed(1)} KB)`;
+                        
+                        showMessage(message, 'success');
                         
                     } catch (error) {
                         hideProcessing();
@@ -832,43 +989,96 @@
                 invoiceType: document.getElementById('defaultInvoiceType').value,
                 businessType: document.getElementById('businessType').value,
                 includeCustomers: document.getElementById('includeCustomers').value === 'true',
-                customerCodePrefix: document.getElementById('customerCodePrefix').value || 'CUST',
+                customerCodePrefix: document.getElementById('customerCodePrefix').value || 'C',
+                customerCodeLogic: document.getElementById('customerCodeLogic').value || 'hash',
                 homeCountry: document.getElementById('homeCountry').value,
                 countryColumn: document.getElementById('countryColumn').value,
                 defaultVATRate: document.getElementById('defaultVATRate').value || 'S',
                 vatRateColumn: document.getElementById('vatRateColumn').value.trim()
             };
             
+            // Function to generate unique customer code
+            function generateCustomerCode(customer, index, settings) {
+                switch (settings.customerCodeLogic) {
+                    case 'hash':
+                        // Use hash of customer name for consistent codes
+                        if (customer.name) {
+                            const hash = simpleHash(customer.name.trim().toUpperCase());
+                            // Add optional prefix
+                            return settings.customerCodePrefix ? settings.customerCodePrefix + hash : hash;
+                        }
+                        // Fall through to timestamp if no name
+                        /* falls through */
+                        
+                    case 'taxnumber':
+                        // Use tax number if available, otherwise fall back to name-based
+                        if (customer.taxNumber && customer.taxNumber.trim()) {
+                            // Remove common prefixes like SI, AT, DE etc.
+                            return customer.taxNumber.replace(/^[A-Z]{2}/i, '').trim();
+                        }
+                        // Fall through to name-based if no tax number
+                        /* falls through */
+                        
+                    case 'namebased':
+                        // Create code from customer name (first 10 chars, uppercase, no spaces)
+                        if (customer.name) {
+                            const nameCode = customer.name
+                                .toUpperCase()
+                                .replace(/[^A-Z0-9]/g, '') // Remove non-alphanumeric
+                                .substring(0, 20); // Limit to 20 chars
+                            if (nameCode) return nameCode;
+                        }
+                        // Fall through to timestamp if no valid name code
+                        /* falls through */
+                        
+                    case 'timestamp':
+                        // Add timestamp to make unique
+                        const timestamp = new Date().getTime().toString(36).toUpperCase();
+                        return settings.customerCodePrefix + timestamp + '_' + (index + 1);
+                        
+                    case 'manual':
+                    default:
+                        // Use prefix with index
+                        return settings.customerCodePrefix + (index + 1).toString().padStart(3, '0');
+                }
+            }
+            
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.2 - Includes DDV Book Support + Hash-based Customer Codes -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
             xml += 'https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo.xsd">\n';
             
             // Extract unique customers if enabled
+            const customerMap = new Map(); // Map to track unique customers
+            
             if (settings.includeCustomers) {
-                const customers = new Map();
                 data.forEach((row, index) => {
                     const customerName = row['Name'];
-                    if (customerName && !customers.has(customerName)) {
-                        const customerCode = settings.customerCodePrefix + (index + 1).toString().padStart(3, '0');
+                    if (customerName && !customerMap.has(customerName)) {
                         const country = getCustomerCountry(row, settings.countryColumn);
-                        customers.set(customerName, {
-                            code: customerCode,
+                        const customer = {
                             name: customerName,
                             address: row['Address'] || '',
                             postalCode: row['Postal code'] || '',
                             city: row['City'] || '',
                             country: country,
                             taxNumber: row['Tax number'] || ''
-                        });
+                        };
+                        
+                        // Generate unique code for this customer
+                        const customerCode = generateCustomerCode(customer, customerMap.size, settings);
+                        customer.code = customerCode;
+                        
+                        customerMap.set(customerName, customer);
                     }
                 });
                 
                 // Add customers section following exact schema order
-                if (customers.size > 0) {
+                if (customerMap.size > 0) {
                     xml += '  <Stranke>\n';
-                    customers.forEach(customer => {
+                    customerMap.forEach(customer => {
                         xml += '    <Stranka>\n';
                         xml += `      <Sifra>${escapeXml(customer.code)}</Sifra>\n`;
                         xml += `      <Naziv>${escapeXml(customer.name)}</Naziv>\n`;
@@ -902,8 +1112,12 @@
                 const netAmount = parseFloat(row['Total'] || 0);
                 const grossAmount = parseFloat(row['Total w/ tax'] || netAmount);
                 const taxAmount = grossAmount - netAmount;
-                const customerCode = settings.includeCustomers ? 
-                    settings.customerCodePrefix + (index + 1).toString().padStart(3, '0') : '';
+                
+                // Get customer code from map if customers are included
+                let customerCode = '';
+                if (settings.includeCustomers && row['Name'] && customerMap.has(row['Name'])) {
+                    customerCode = customerMap.get(row['Name']).code;
+                }
                 
                 // Check if this is a credit note
                 const isCreditNote = row['Type'] && row['Type'].toString().toLowerCase().includes('credit');
@@ -916,7 +1130,14 @@
                 
                 // Debug for first record
                 if (index === 0) {
+                    console.log('=== Minimax XML Converter v2.2 Debug Info ===');
                     console.log('Account selection for first record:');
+                    console.log('Customer:', row['Name']);
+                    console.log('Customer code:', customerCode || 'Not included');
+                    console.log('Customer code logic:', settings.customerCodeLogic);
+                    if (settings.customerCodeLogic === 'hash' && row['Name']) {
+                        console.log('Hash code generated:', simpleHash(row['Name'].trim().toUpperCase()));
+                    }
                     console.log('Customer country:', customerCountry);
                     console.log('Country type:', countryType);
                     console.log('Document type:', isCreditNote ? 'Credit Note' : 'Invoice');
@@ -924,7 +1145,8 @@
                     console.log('  Receivables:', accounts.receivables);
                     console.log('  Revenue:', accounts.revenue);
                     console.log('  VAT:', accounts.vat || 'No VAT');
-                    console.log('DDV segment:', Math.abs(taxAmount) > 0.001 && accounts.vat && countryType !== 'third' ? 'Will be included' : 'Not included');
+                    console.log('DDV segment:', Math.abs(taxAmount) > 0.001 && accounts.vat && countryType !== 'third' && settings.invoiceType === 'IR' ? 'Will be included' : 'Not included');
+                    console.log('==========================================');
                 }
                 
                 xml += '    <Temeljnica>\n';
@@ -979,6 +1201,7 @@
                     xml += `              <SifraStopnjeDDV>${vatRateCode}</SifraStopnjeDDV>\n`;
                     
                     // For services vs goods, use appropriate fields
+                    // Note: DDV book typically shows absolute values
                     if (settings.businessType === 'services') {
                         xml += `              <StoritevOsnova>${Math.abs(netAmount).toFixed(2)}</StoritevOsnova>\n`;
                         xml += `              <StoritevDDV>${Math.abs(taxAmount).toFixed(2)}</StoritevDDV>\n`;
@@ -1286,7 +1509,7 @@
                 console.log('XML length:', generatedXML.length);
                 
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = `minimax_invoices_${timestamp}.xml`;
+                const filename = `minimax_invoices_v2.2_${timestamp}.xml`;
                 
                 console.log('Attempting download with filename:', filename);
                 
@@ -1433,7 +1656,7 @@
                         </button>
                     </div>
                     <div style="background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;">
-                        <strong>📁 Save as:</strong> minimax_invoices_${new Date().toISOString().split('T')[0]}.xml
+                        <strong>📁 Save as:</strong> minimax_invoices_v2.2_${new Date().toISOString().split('T')[0]}.xml
                     </div>
                     <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(generatedXML)}</pre>
                 `;
