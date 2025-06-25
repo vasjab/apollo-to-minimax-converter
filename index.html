@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.5 - With DDV Book Support & Correct OSS Schema</title>
+    <title>Minimax Invoice XML Converter v2.6 - DDV Book + OSS with Both Amount Fields</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -383,7 +383,7 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.5</strong> | Last updated: December 2024 | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Correct OSS Schema</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
+                <strong>Version 2.6</strong> | Last updated: December 2024 | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ OSS with Both Amount Fields</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
             </div>
         </div>
         
@@ -391,15 +391,15 @@
             <h3>✅ Smart Account Selection & VAT Book Integration</h3>
             <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper invoice processing. The converter intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. It also properly handles credit notes (detected from "Type" column) with negative VAT values and includes DDV (VAT) segments for the VAT book.</p>
             <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.5:</strong> 
+                <strong style="color: #16a34a;">🆕 New in v2.6:</strong> 
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                    <li><strong>Correct OSS Schema Implementation</strong> - OSS fields only on revenue entries, not VAT entries</li>
-                    <li><strong>Proper amount element usage</strong> - Revenue entries with OSS use ZnesekOsnoveVDenarniEnoti</li>
-                    <li><strong>VAT entries remain standard</strong> - No OSS fields on VAT entries to maintain schema compliance</li>
+                    <li><strong>Fixed OSS Amount Fields</strong> - OSS entries now include BOTH standard journal amounts AND OSS base amounts</li>
+                    <li><strong>Complete Double-Entry Bookkeeping</strong> - Revenue entries maintain proper debit/credit balance</li>
+                    <li><strong>OSS Reporting Layer</strong> - Additional fields for tax reporting without disrupting accounting</li>
                     <li><strong>Automatic VAT calculation</strong> - System calculates VAT percentage from invoice amounts</li>
                     <li><strong>ISO country codes</strong> - Converts country names to ISO codes (DE, FR, etc.)</li>
                     <li>Full DDV book support with proper VAT book entries</li>
-                    <li>Hash-based customer codes prevent duplicates</li>
+                    <li>Hash-based customer codes prevent duplicates (same name = same code)</li>
                 </ul>
             </div>
         </div>
@@ -627,7 +627,7 @@
         
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.5</strong> | Features: IR Journal Entries + DDV Book + Credit Notes + Correct OSS Schema<br>
+                <strong>Minimax XML Converter v2.6</strong> | Features: IR Journal Entries + DDV Book + OSS with Both Amount Fields<br>
                 <span style="color: #48bb78;">✓</span> OSS support with correct XML schema | 
                 <span style="color: #48bb78;">✓</span> DDV/VAT book entries | 
                 <span style="color: #48bb78;">✓</span> Credit notes with negative VAT | 
@@ -640,8 +640,8 @@
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.5 loaded');
-        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, Correct OSS Schema');
+        console.log('Minimax XML Converter v2.6 loaded');
+        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, OSS with Both Amount Fields');
         console.log('Last updated: December 2024');
         
         // Simple hash function to create consistent short codes
@@ -1276,7 +1276,7 @@
                 xml += `          <SifraKonta>${escapeXml(accounts.revenue)}</SifraKonta>\n`;
                 xml += `          <DatumOpravljanja>${invoiceDate}</DatumOpravljanja>\n`;
                 
-                // Add OSS fields for EU transactions with VAT - these belong in journal entry lines!
+                // Add OSS fields for EU transactions with VAT
                 if (countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR') {
                     xml += '          <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n'; // D = Da (Yes)
                     
@@ -1293,8 +1293,9 @@
                     xml += `          <BlagoStoritev>${goodsServices}</BlagoStoritev>\n`;
                     xml += `          <DatumDDV>${invoiceDate}</DatumDDV>\n`;
                     
-                    // IMPORTANT: When OSS is present, use ZnesekOsnoveVDenarniEnoti instead of ZnesekVDobroVDomaciDenarniEnoti
-                    xml += `          <ZnesekOsnoveVDenarniEnoti>${Math.abs(netAmount).toFixed(2)}</ZnesekOsnoveVDenarniEnoti>\n`;
+                    // IMPORTANT: For OSS entries, we need BOTH the regular amount AND the OSS base amount
+                    xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${Math.abs(netAmount).toFixed(2)}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
+                    xml += `          <ZnesekOsnoveVDomaciDenarniEnoti>${Math.abs(netAmount).toFixed(2)}</ZnesekOsnoveVDomaciDenarniEnoti>\n`;
                 } else {
                     // Regular entry without OSS
                     xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${Math.abs(netAmount).toFixed(2)}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
