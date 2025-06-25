@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.8 - DDV Book + OSS with Both Amount Fields</title>
+    <title>Minimax Invoice XML Converter v2.9 - DDV Book + OSS with Proper VAT Rates</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -383,7 +383,7 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.8</strong> | Last updated: December 2024 | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Working OSS Support</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
+                <strong>Version 2.9</strong> | Last updated: <span id="updateTimestamp"></span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Fixed OSS VAT Rates</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
             </div>
         </div>
         
@@ -391,16 +391,13 @@
             <h3>✅ Smart Account Selection & VAT Book Integration</h3>
             <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper invoice processing. The converter intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. It also properly handles credit notes (detected from "Type" column) with negative VAT values and includes DDV (VAT) segments for the VAT book.</p>
             <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.8:</strong> 
+                <strong style="color: #16a34a;">🆕 New in v2.9:</strong> 
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                    <li><strong>FIXED OSS Support</strong> - OSS entries now include BOTH standard amounts AND base amount field</li>
-                    <li><strong>No More Zero Amount Errors</strong> - Revenue entries always have proper debit/credit amounts</li>
-                    <li><strong>Complete Journal Entries</strong> - Standard amount fields populated for all entries</li>
-                    <li><strong>OSS Base Amount Addition</strong> - ZnesekOsnoveVDomaciDenarniEnoti added for EU transactions</li>
-                    <li><strong>Automatic VAT calculation</strong> - System calculates VAT percentage from invoice amounts</li>
-                    <li><strong>ISO country codes</strong> - Converts country names to ISO codes (DE, FR, etc.)</li>
-                    <li>Full DDV book support with proper VAT book entries</li>
-                    <li>Hash-based customer codes prevent duplicates</li>
+                    <li><strong>FIXED VAT Rate Calculation</strong> - OSS VAT percentages now properly rounded to standard rates (20%, 21%, 19%, etc.)</li>
+                    <li><strong>Smart VAT Detection</strong> - Attempts to read VAT rate from Excel headers/data before calculating</li>
+                    <li><strong>Dynamic Timestamp</strong> - Shows actual last update date and time</li>
+                    <li><strong>Standard EU VAT Rates</strong> - Automatically rounds to known EU country VAT rates</li>
+                    <li>All previous features: OSS support, DDV book, ISO country codes, hash-based customer codes</li>
                 </ul>
             </div>
         </div>
@@ -410,7 +407,7 @@
             <h2>📁 Step 1: Upload Your Invoice Export</h2>
             <p style="color: #718096; font-size: 0.9rem; margin-bottom: 20px;">
                 Required columns: Number, Name, Date, Date due, Total, Total w/ tax<br>
-                Optional columns: Type (for credit notes), Tax number, Country, Address, City, Postal code
+                Optional columns: Type (for credit notes), Tax number, Country, Address, City, Postal code, VAT rate
             </p>
             <div class="file-upload" id="fileUpload">
                 <div class="file-upload-icon">📊</div>
@@ -628,8 +625,8 @@
         
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.8</strong> | Features: IR Journal Entries + DDV Book + Working OSS Support<br>
-                <span style="color: #48bb78;">✓</span> OSS support with correct XML schema | 
+                <strong>Minimax XML Converter v2.9</strong> | Features: IR Journal Entries + DDV Book + Fixed OSS VAT Rates<br>
+                <span style="color: #48bb78;">✓</span> Proper VAT rate calculation | 
                 <span style="color: #48bb78;">✓</span> DDV/VAT book entries | 
                 <span style="color: #48bb78;">✓</span> Credit notes with negative VAT | 
                 <span style="color: #48bb78;">✓</span> Smart country detection |
@@ -641,9 +638,57 @@
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.8 loaded');
-        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, Working OSS with Both Amount Fields');
-        console.log('Last updated: December 2024');
+        console.log('Minimax XML Converter v2.9 loaded');
+        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, Fixed OSS VAT Rates');
+        console.log('Last updated:', new Date().toLocaleString());
+        
+        // Update timestamp dynamically
+        function updateTimestamp() {
+            const now = new Date();
+            const timestamp = now.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            }) + ' at ' + now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const timestampElement = document.getElementById('updateTimestamp');
+            if (timestampElement) {
+                timestampElement.textContent = timestamp;
+            }
+        }
+        
+        // Standard EU VAT rates (as of 2025)
+        const EU_VAT_RATES = {
+            'AT': 20,    // Austria
+            'BE': 21,    // Belgium
+            'BG': 20,    // Bulgaria
+            'HR': 25,    // Croatia
+            'CY': 19,    // Cyprus
+            'CZ': 21,    // Czech Republic
+            'DK': 25,    // Denmark
+            'EE': 22,    // Estonia (increased from 20)
+            'FI': 25.5,  // Finland (increased from 24)
+            'FR': 20,    // France
+            'DE': 19,    // Germany
+            'GR': 24,    // Greece
+            'HU': 27,    // Hungary
+            'IE': 23,    // Ireland
+            'IT': 22,    // Italy
+            'LV': 21,    // Latvia
+            'LT': 21,    // Lithuania
+            'LU': 17,    // Luxembourg
+            'MT': 18,    // Malta
+            'NL': 21,    // Netherlands
+            'PL': 23,    // Poland
+            'PT': 23,    // Portugal
+            'RO': 19,    // Romania
+            'SK': 20,    // Slovakia
+            'SI': 22,    // Slovenia
+            'ES': 21,    // Spain
+            'SE': 25     // Sweden
+        };
         
         // Simple hash function to create consistent short codes
         function simpleHash(str) {
@@ -678,7 +723,8 @@
         
         // Show version notification on load
         window.addEventListener('DOMContentLoaded', function() {
-            showMessage('✅ Minimax XML Converter v2.3 loaded - Fixed OSS Support with proper XML schema', 'info');
+            updateTimestamp();
+            showMessage('✅ Minimax XML Converter v2.9 loaded - Fixed OSS VAT rates with proper rounding', 'info');
             
             // Test hash function examples
             console.log('Hash function examples (same name always produces same code):');
@@ -692,6 +738,7 @@
         
         let invoiceData = [];
         let generatedXML = '';
+        let columnHeaders = {}; // Store column headers
         
         // File upload handling
         document.getElementById('dataFile').addEventListener('change', handleFileSelect);
@@ -777,6 +824,26 @@
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
                     
+                    // Extract headers to check for VAT rate info
+                    const range = XLSX.utils.decode_range(worksheet['!ref']);
+                    columnHeaders = {};
+                    
+                    for (let col = range.s.c; col <= range.e.c; col++) {
+                        const headerCell = worksheet[XLSX.utils.encode_cell({r: 0, c: col})];
+                        if (headerCell && headerCell.v) {
+                            const headerText = String(headerCell.v);
+                            // Store the column letter for each header
+                            const colLetter = XLSX.utils.encode_col(col);
+                            columnHeaders[headerText] = colLetter;
+                            
+                            // Check if header contains VAT percentage info
+                            const vatMatch = headerText.match(/(\d+(?:\.\d+)?)\s*%/);
+                            if (vatMatch) {
+                                console.log(`Found VAT rate in header "${headerText}": ${vatMatch[1]}%`);
+                            }
+                        }
+                    }
+                    
                     // Convert to JSON with proper date handling
                     invoiceData = XLSX.utils.sheet_to_json(worksheet, {
                         raw: false,
@@ -809,6 +876,61 @@
                 showMessage('Error reading file. Please try again.', 'error');
             };
             reader.readAsArrayBuffer(file);
+        }
+        
+        // Function to extract VAT rate from column header or data
+        function getVATRateFromData(row, columnHeaders) {
+            // Check if any column header contains VAT percentage
+            for (const [header, colLetter] of Object.entries(columnHeaders)) {
+                const vatMatch = header.match(/(\d+(?:\.\d+)?)\s*%/);
+                if (vatMatch) {
+                    return parseFloat(vatMatch[1]);
+                }
+            }
+            
+            // Check data for VAT rate information
+            const vatRateColumn = document.getElementById('vatRateColumn').value.trim();
+            if (vatRateColumn && row[vatRateColumn]) {
+                const vatValue = String(row[vatRateColumn]);
+                // Try to extract percentage from value
+                const match = vatValue.match(/(\d+(?:\.\d+)?)/);
+                if (match) {
+                    return parseFloat(match[1]);
+                }
+            }
+            
+            return null;
+        }
+        
+        // Function to round VAT rate to nearest standard EU rate
+        function roundToStandardVATRate(calculatedRate, countryCode) {
+            // First check if we have a specific rate for this country
+            if (countryCode && EU_VAT_RATES[countryCode]) {
+                return EU_VAT_RATES[countryCode];
+            }
+            
+            // All EU standard VAT rates for rounding
+            const allStandardRates = [...new Set(Object.values(EU_VAT_RATES))].sort((a, b) => a - b);
+            
+            // Find the closest standard rate
+            let closestRate = allStandardRates[0];
+            let minDiff = Math.abs(calculatedRate - closestRate);
+            
+            for (const rate of allStandardRates) {
+                const diff = Math.abs(calculatedRate - rate);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestRate = rate;
+                }
+            }
+            
+            // If the difference is less than 0.5%, use the standard rate
+            if (minDiff < 0.5) {
+                return closestRate;
+            }
+            
+            // Otherwise, round to nearest 0.5%
+            return Math.round(calculatedRate * 2) / 2;
         }
         
         function displayDataPreview() {
@@ -1064,7 +1186,7 @@
             }
             
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            xml += '<!-- Generated by Minimax XML Converter v2.3 - DDV Book + Fixed OSS Support + ISO Country Codes -->\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.9 - DDV Book + Fixed OSS VAT Rates + ISO Country Codes -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
@@ -1150,9 +1272,12 @@
                 const countryType = classifyCountry(customerCountry, settings.homeCountry);
                 const accounts = getAccountsByCountryType(countryType, settings.businessType);
                 
+                // Get country ISO code
+                const countryISO = COUNTRY_CODES[customerCountry] || customerCountry;
+                
                 // Debug for first record
                 if (index === 0) {
-                    console.log('=== Minimax XML Converter v2.3 Debug Info ===');
+                    console.log('=== Minimax XML Converter v2.9 Debug Info ===');
                     console.log('Account selection for first record:');
                     console.log('Customer:', row['Name']);
                     console.log('Customer code:', customerCode || 'Not included');
@@ -1161,7 +1286,7 @@
                         console.log('Hash code generated:', simpleHash(row['Name'].trim().toUpperCase()));
                     }
                     console.log('Customer country:', customerCountry);
-                    console.log('Country code (ISO):', COUNTRY_CODES[customerCountry] || customerCountry);
+                    console.log('Country code (ISO):', countryISO);
                     console.log('Country type:', countryType);
                     console.log('Document type:', isCreditNote ? 'Credit Note' : 'Invoice');
                     console.log('Selected accounts:');
@@ -1285,11 +1410,25 @@
                     xml += '          <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n'; // D = Da (Yes)
                     
                     // Use ISO country code
-                    const countryISO = COUNTRY_CODES[customerCountry] || customerCountry;
                     xml += `          <Drzava>${escapeXml(countryISO)}</Drzava>\n`;
                     
                     // Calculate VAT percentage from amounts
-                    const vatPercent = netAmount !== 0 ? Math.abs((taxAmount / netAmount) * 100) : 0;
+                    let vatPercent = netAmount !== 0 ? Math.abs((taxAmount / netAmount) * 100) : 0;
+                    
+                    // Try to get VAT rate from data first
+                    const dataVatRate = getVATRateFromData(row, columnHeaders);
+                    if (dataVatRate !== null) {
+                        vatPercent = dataVatRate;
+                        console.log(`Row ${index + 1}: Using VAT rate from data: ${vatPercent}%`);
+                    } else {
+                        // Round to standard EU VAT rate
+                        const originalPercent = vatPercent;
+                        vatPercent = roundToStandardVATRate(vatPercent, countryISO);
+                        if (originalPercent !== vatPercent) {
+                            console.log(`Row ${index + 1}: Rounded VAT from ${originalPercent.toFixed(2)}% to ${vatPercent}% (standard rate for ${countryISO || 'EU'})`);
+                        }
+                    }
+                    
                     xml += `          <Odstotek>${vatPercent.toFixed(2)}</Odstotek>\n`;
                     
                     // Set goods/services type - use capital first letter as per documentation
@@ -1578,7 +1717,7 @@
                 console.log('XML length:', generatedXML.length);
                 
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = `minimax_invoices_v2.3_${timestamp}.xml`;
+                const filename = `minimax_invoices_v2.9_${timestamp}.xml`;
                 
                 console.log('Attempting download with filename:', filename);
                 
@@ -1725,7 +1864,7 @@
                         </button>
                     </div>
                     <div style="background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;">
-                        <strong>📁 Save as:</strong> minimax_invoices_v2.3_${new Date().toISOString().split('T')[0]}.xml
+                        <strong>📁 Save as:</strong> minimax_invoices_v2.9_${new Date().toISOString().split('T')[0]}.xml
                     </div>
                     <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(generatedXML)}</pre>
                 `;
