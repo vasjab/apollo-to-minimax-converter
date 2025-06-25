@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.10 - DDV Book + OSS with Integer VAT Rates</title>
+    <title>Minimax Invoice XML Converter v2.11 - DDV Book + OSS with Decimal VAT Rates</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -383,7 +383,7 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.10</strong> | Last updated: <span id="updateTimestamp"></span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Integer VAT Rates for OSS</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
+                <strong>Version 2.11</strong> | Last updated: <span id="updateTimestamp"></span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Decimal VAT Rates for OSS</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
             </div>
         </div>
         
@@ -391,13 +391,14 @@
             <h3>✅ Smart Account Selection & VAT Book Integration</h3>
             <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper invoice processing. The converter intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. It also properly handles credit notes (detected from "Type" column) with negative VAT values and includes DDV (VAT) segments for the VAT book.</p>
             <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.10:</strong> 
+                <strong style="color: #16a34a;">🆕 New in v2.11:</strong> 
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                    <li><strong>INTEGER VAT Rates for OSS</strong> - VAT percentages now output as integers (20, 21, 19) instead of decimals (20.00)</li>
-                    <li><strong>Fixed Minimax Import Error</strong> - OSS entries now properly import without VAT percentage errors</li>
+                    <li><strong>DECIMAL VAT Rates for OSS</strong> - VAT percentages now output with 2 decimal places (20.00, 21.00, 19.00) as required by Minimax</li>
+                    <li><strong>Fixed Minimax Import Error</strong> - OSS entries now comply with Minimax XML schema decimal format requirements</li>
+                    <li><strong>Schema Compliance</strong> - Odstotek field follows xs:decimal with exactly 2 fraction digits specification</li>
                     <li><strong>Updated Default Accounts</strong> - New default revenue accounts: 7620 (SI), 76301 (EU), 76302 (Third)</li>
+                    <li><strong>Corrected Domestic VAT Account</strong> - Slovenia VAT account changed from 26070 to 26000</li>
                     <li><strong>Smart VAT Detection</strong> - Attempts to read VAT rate from Excel headers/data before calculating</li>
-                    <li><strong>Fixed Timestamp</strong> - Shows actual code generation date</li>
                     <li>All previous features: OSS support, DDV book, ISO country codes, hash-based customer codes</li>
                 </ul>
             </div>
@@ -561,7 +562,7 @@
                     </div>
                     <div class="setting-item">
                         <label>🇸🇮 Domestic VAT</label>
-                        <input type="text" id="domesticVAT" placeholder="Auto: 26070">
+                        <input type="text" id="domesticVAT" placeholder="Auto: 26000">
                     </div>
                     
                     <div class="setting-item">
@@ -626,8 +627,8 @@
         
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.10</strong> | Features: IR Journal Entries + DDV Book + Integer OSS VAT Rates<br>
-                <span style="color: #48bb78;">✓</span> Integer VAT rates for OSS | 
+                <strong>Minimax XML Converter v2.11</strong> | Features: IR Journal Entries + DDV Book + Decimal OSS VAT Rates<br>
+                <span style="color: #48bb78;">✓</span> Decimal VAT rates for OSS (xx.xx format) | 
                 <span style="color: #48bb78;">✓</span> DDV/VAT book entries | 
                 <span style="color: #48bb78;">✓</span> Credit notes with negative VAT | 
                 <span style="color: #48bb78;">✓</span> Smart country detection |
@@ -639,13 +640,13 @@
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.10 loaded');
-        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, Integer VAT Rates for OSS');
+        console.log('Minimax XML Converter v2.11 loaded');
+        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, Decimal VAT Rates for OSS');
         console.log('Last updated: June 25, 2025');
         
         // Fixed timestamp when code was generated
         function updateTimestamp() {
-            const timestamp = "June 25, 2025 at 11:15 AM";
+            const timestamp = "June 25, 2025 at 12:30 PM";
             const timestampElement = document.getElementById('updateTimestamp');
             if (timestampElement) {
                 timestampElement.textContent = timestamp;
@@ -717,7 +718,7 @@
         // Show version notification on load
         window.addEventListener('DOMContentLoaded', function() {
             updateTimestamp();
-            showMessage('✅ Minimax XML Converter v2.10 loaded - Integer VAT rates for OSS to fix Minimax import errors', 'info');
+            showMessage('✅ Minimax XML Converter v2.11 loaded - Decimal VAT rates (xx.xx format) for OSS compliance', 'info');
             
             // Test hash function examples
             console.log('Hash function examples (same name always produces same code):');
@@ -1179,7 +1180,7 @@
             }
             
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            xml += '<!-- Generated by Minimax XML Converter v2.10 - DDV Book + Integer OSS VAT Rates + ISO Country Codes -->\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.11 - DDV Book + Decimal OSS VAT Rates + ISO Country Codes -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
@@ -1270,7 +1271,7 @@
                 
                 // Debug for first record
                 if (index === 0) {
-                    console.log('=== Minimax XML Converter v2.10 Debug Info ===');
+                    console.log('=== Minimax XML Converter v2.11 Debug Info ===');
                     console.log('Account selection for first record:');
                     console.log('Customer:', row['Name']);
                     console.log('Customer code:', customerCode || 'Not included');
@@ -1287,7 +1288,7 @@
                     console.log('  Revenue:', accounts.revenue);
                     console.log('  VAT:', accounts.vat || 'No VAT');
                     console.log('DDV segment:', Math.abs(taxAmount) > 0.001 && accounts.vat && countryType !== 'third' && settings.invoiceType === 'IR' ? 'Will be included' : 'Not included');
-                    console.log('OSS journal entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will use ZnesekOsnoveVDenarniEnoti for revenue with INTEGER VAT %' : 'Standard entry');
+                    console.log('OSS journal entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will use ZnesekOsnoveVDenarniEnoti for revenue with DECIMAL VAT % (xx.xx format)' : 'Standard entry');
                     console.log('==========================================');
                 }
                 
@@ -1412,17 +1413,17 @@
                     const dataVatRate = getVATRateFromData(row, columnHeaders);
                     if (dataVatRate !== null) {
                         vatPercent = dataVatRate;
-                        console.log(`Row ${index + 1}: Using VAT rate from data: ${vatPercent}%. Will output as integer: ${Math.round(vatPercent)}`);
+                        console.log(`Row ${index + 1}: Using VAT rate from data: ${vatPercent}%. Will output as decimal: ${vatPercent.toFixed(2)}`);
                     } else {
                         // Round to standard EU VAT rate
                         const originalPercent = vatPercent;
                         vatPercent = roundToStandardVATRate(vatPercent, countryISO);
                         if (originalPercent !== vatPercent) {
-                            console.log(`Row ${index + 1}: Rounded VAT from ${originalPercent.toFixed(2)}% to ${vatPercent}% (standard rate for ${countryISO || 'EU'}). Will output as integer: ${Math.round(vatPercent)}`);
+                            console.log(`Row ${index + 1}: Rounded VAT from ${originalPercent.toFixed(2)}% to ${vatPercent}% (standard rate for ${countryISO || 'EU'}). Will output as decimal: ${vatPercent.toFixed(2)}`);
                         }
                     }
                     
-                    xml += `          <Odstotek>${Math.round(vatPercent)}</Odstotek>\n`;
+                    xml += `          <Odstotek>${vatPercent.toFixed(2)}</Odstotek>\n`;
                     
                     // Set goods/services type - use capital first letter as per documentation
                     const goodsServices = settings.businessType === 'services' ? 'Storitev' : 'Blago';
@@ -1710,7 +1711,7 @@
                 console.log('XML length:', generatedXML.length);
                 
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = `minimax_invoices_v2.10_${timestamp}.xml`;
+                const filename = `minimax_invoices_v2.11_${timestamp}.xml`;
                 
                 console.log('Attempting download with filename:', filename);
                 
@@ -1857,7 +1858,7 @@
                         </button>
                     </div>
                     <div style="background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;">
-                        <strong>📁 Save as:</strong> minimax_invoices_v2.10_${new Date().toISOString().split('T')[0]}.xml
+                        <strong>📁 Save as:</strong> minimax_invoices_v2.11_${new Date().toISOString().split('T')[0]}.xml
                     </div>
                     <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(generatedXML)}</pre>
                 `;
