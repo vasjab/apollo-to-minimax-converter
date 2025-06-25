@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.3 - With DDV Book Support & Fixed OSS</title>
+    <title>Minimax Invoice XML Converter v2.5 - With DDV Book Support & Correct OSS Schema</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -383,7 +383,7 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.3</strong> | Last updated: December 2024 | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Fixed OSS Support</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
+                <strong>Version 2.5</strong> | Last updated: December 2024 | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ Correct OSS Schema</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
             </div>
         </div>
         
@@ -391,14 +391,15 @@
             <h3>✅ Smart Account Selection & VAT Book Integration</h3>
             <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper invoice processing. The converter intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions according to Slovenian accounting standards. It also properly handles credit notes (detected from "Type" column) with negative VAT values and includes DDV (VAT) segments for the VAT book.</p>
             <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.3:</strong> 
+                <strong style="color: #16a34a;">🆕 New in v2.5:</strong> 
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                    <li><strong>Fixed OSS support</strong> - Proper XML schema compliance with correct element names</li>
-                    <li><strong>Automatic VAT rate detection</strong> - Calculates VAT percentage from invoice amounts</li>
-                    <li><strong>ISO country codes</strong> - Proper country identification for OSS</li>
-                    <li><strong>Correct OSS field values</strong> - Uses "D" for PredlozitevObracunaOSS and proper capitalization</li>
-                    <li>Full DDV book support - Each invoice with VAT includes proper VAT book entries</li>
-                    <li>Hash-based customer codes - Same customer name always generates same code</li>
+                    <li><strong>Correct OSS Schema Implementation</strong> - OSS fields only on revenue entries, not VAT entries</li>
+                    <li><strong>Proper amount element usage</strong> - Revenue entries with OSS use ZnesekOsnoveVDenarniEnoti</li>
+                    <li><strong>VAT entries remain standard</strong> - No OSS fields on VAT entries to maintain schema compliance</li>
+                    <li><strong>Automatic VAT calculation</strong> - System calculates VAT percentage from invoice amounts</li>
+                    <li><strong>ISO country codes</strong> - Converts country names to ISO codes (DE, FR, etc.)</li>
+                    <li>Full DDV book support with proper VAT book entries</li>
+                    <li>Hash-based customer codes prevent duplicates</li>
                 </ul>
             </div>
         </div>
@@ -626,7 +627,7 @@
         
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.3</strong> | Features: IR Journal Entries + DDV Book + Credit Notes + Fixed OSS Support<br>
+                <strong>Minimax XML Converter v2.5</strong> | Features: IR Journal Entries + DDV Book + Credit Notes + Correct OSS Schema<br>
                 <span style="color: #48bb78;">✓</span> OSS support with correct XML schema | 
                 <span style="color: #48bb78;">✓</span> DDV/VAT book entries | 
                 <span style="color: #48bb78;">✓</span> Credit notes with negative VAT | 
@@ -639,8 +640,8 @@
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.3 loaded');
-        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, FIXED OSS Support');
+        console.log('Minimax XML Converter v2.5 loaded');
+        console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, Correct OSS Schema');
         console.log('Last updated: December 2024');
         
         // Simple hash function to create consistent short codes
@@ -1310,22 +1311,8 @@
                     xml += `          <SifraKonta>${escapeXml(accounts.vat)}</SifraKonta>\n`;
                     xml += `          <DatumOpravljanja>${invoiceDate}</DatumOpravljanja>\n`;
                     
-                    // Add OSS fields for EU VAT transactions - these also belong in VAT journal entry lines!
-                    if (countryType === 'eu' && settings.invoiceType === 'IR') {
-                        xml += '          <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n';
-                        
-                        const countryISO = COUNTRY_CODES[customerCountry] || customerCountry;
-                        xml += `          <Drzava>${escapeXml(countryISO)}</Drzava>\n`;
-                        
-                        const vatPercent = netAmount !== 0 ? Math.abs((taxAmount / netAmount) * 100) : 0;
-                        xml += `          <Odstotek>${vatPercent.toFixed(2)}</Odstotek>\n`;
-                        
-                        const goodsServices = settings.businessType === 'services' ? 'Storitev' : 'Blago';
-                        xml += `          <BlagoStoritev>${goodsServices}</BlagoStoritev>\n`;
-                        xml += `          <DatumDDV>${invoiceDate}</DatumDDV>\n`;
-                    }
-                    
-                    // VAT entries always use the standard element name
+                    // NOTE: OSS fields are NOT included on VAT entries - only on revenue entries
+                    // VAT entries always use the standard element name without OSS fields
                     xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${Math.abs(taxAmount).toFixed(2)}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
                     xml += '        </VrsticaTemeljnice>\n';
                 }
