@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.16 - Third Country Credit Note VAT Fix + Credit Notes Fix + DDV Book + VAT Detection</title>
+    <title>Minimax Invoice XML Converter v2.17 - Third Country Credit Note DDV Section + Third Country Credit Note VAT + Credit Notes Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -383,7 +383,7 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.16</strong> | Last updated: <span id="updateTimestamp"></span> | <span style="color: #48bb78;">✓ Third Country Credit Note VAT</span> | <span style="color: #48bb78;">✓ Credit Notes Fix</span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ VAT Detection</span>
+                <strong>Version 2.17</strong> | Last updated: <span id="updateTimestamp"></span> | <span style="color: #48bb78;">✓ Third Country Credit Note DDV</span> | <span style="color: #48bb78;">✓ Credit Notes Fix</span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ VAT Detection</span>
             </div>
         </div>
         
@@ -394,8 +394,9 @@
             <p style="margin-top: 10px;"><strong>📊 Flexible Excel Format:</strong> Your Excel files can have VAT amounts in different columns - the converter will automatically find them and extract the correct VAT rates from the headers above each VAT column.</p>
             <p style="margin-top: 10px;"><strong>🔧 Credit Note VAT Corrections:</strong> For credit notes issued to third countries (non-EU), VAT is included if present in the Excel data. This allows you to correct previous VAT errors by using the domestic VAT account (26000) for the correction entry.</p>
             <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.16:</strong> 
+                <strong style="color: #16a34a;">🆕 New in v2.17:</strong> 
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
+                    <li><strong>Third Country Credit Note DDV Section</strong> - DDV book entries now included for third country credit notes with VAT</li>
                     <li><strong>Third Country Credit Note VAT</strong> - VAT included on credit notes for non-EU countries to correct previous errors</li>
                     <li><strong>Credit Notes Fix (DDV Book)</strong> - Negative amounts now shown correctly in DDV book for credit notes</li>
                     <li><strong>Credit Notes Fix (Journal)</strong> - Proper handling of negative amounts in revenue and VAT entries</li>
@@ -630,7 +631,8 @@
         
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.16</strong> | Features: Third Country Credit Note VAT + Credit Notes Fix + DDV Book + VAT Detection<br>
+                <strong>Minimax XML Converter v2.17</strong> | Features: Third Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book<br>
+                <span style="color: #48bb78;">✓</span> Third country credit note DDV sections | 
                 <span style="color: #48bb78;">✓</span> Third country credit note VAT corrections | 
                 <span style="color: #48bb78;">✓</span> Credit notes with proper negative amounts | 
                 <span style="color: #48bb78;">✓</span> Automatic VAT detection from any Excel column | 
@@ -645,13 +647,13 @@
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.16 loaded');
-        console.log('Features: Third Country Credit Note VAT, Credit Notes Fix (DDV Book & Journal), Automatic VAT Detection, Multi-Column VAT Support, DDV Book, Smart Account Selection');
+        console.log('Minimax XML Converter v2.17 loaded');
+        console.log('Features: Third Country Credit Note DDV Section, Third Country Credit Note VAT, Credit Notes Fix (DDV Book & Journal), Automatic VAT Detection, Multi-Column VAT Support, DDV Book, Smart Account Selection');
         console.log('Last updated: June 25, 2025');
         
         // Fixed timestamp when code was generated
         function updateTimestamp() {
-            const timestamp = "June 25, 2025 at 1:45 PM";
+            const timestamp = "June 25, 2025 at 2:00 PM";
             const timestampElement = document.getElementById('updateTimestamp');
             if (timestampElement) {
                 timestampElement.textContent = timestamp;
@@ -723,7 +725,7 @@
         // Show version notification on load
         window.addEventListener('DOMContentLoaded', function() {
             updateTimestamp();
-            showMessage('✅ Minimax XML Converter v2.16 loaded - Third country credit note VAT fix + Automatic VAT detection!', 'info');
+            showMessage('✅ Minimax XML Converter v2.17 loaded - Third country credit note DDV section fix + Automatic VAT detection!', 'info');
             
             // Test hash function examples
             console.log('Hash function examples (same name always produces same code):');
@@ -1234,7 +1236,7 @@
             }
             
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            xml += '<!-- Generated by Minimax XML Converter v2.16 - Third Country Credit Note VAT + Credit Notes Fix + DDV Book + VAT Detection + ISO Country Codes -->\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.17 - Third Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book + VAT Detection + ISO Country Codes -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
@@ -1366,7 +1368,7 @@
                 
                 // Debug for first record
                 if (index === 0) {
-                    console.log('=== Minimax XML Converter v2.16 Debug Info ===');
+                    console.log('=== Minimax XML Converter v2.17 Debug Info ===');
                     console.log('Account selection for first record:');
                     console.log('Customer:', row['Name']);
                     console.log('Customer code:', customerCode || 'Not included');
@@ -1385,6 +1387,7 @@
                     console.log('DDV segment:', Math.abs(taxAmount) > 0.001 && (accounts.vat || (isCreditNote && countryType === 'third')) && (countryType !== 'third' || isCreditNote) && settings.invoiceType === 'IR' ? 'Will be included' : 'Not included');
                     if (isCreditNote && countryType === 'third' && Math.abs(taxAmount) > 0.001) {
                         console.log('Third country credit note VAT:', 'Will use domestic VAT account for correction');
+                        console.log('Third country credit note DDV:', 'DDV section will be included');
                     }
                     console.log('OSS journal entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will use ZnesekOsnoveVDenarniEnoti for revenue with DECIMAL VAT % (xx.xx format)' : 'Standard entry');
                     console.log('==========================================');
@@ -1402,7 +1405,14 @@
                 // DDV section for VAT book entries (only for invoices with VAT)
                 // This section must be included for the DDV book to appear in Minimax
                 // For credit notes, include DDV even for third countries if VAT exists (to correct errors)
-                if (Math.abs(taxAmount) > 0.001 && accounts.vat && (countryType !== 'third' || isCreditNote) && settings.invoiceType === 'IR') {
+                if (Math.abs(taxAmount) > 0.001 && (accounts.vat || (isCreditNote && countryType === 'third')) && (countryType !== 'third' || isCreditNote) && settings.invoiceType === 'IR') {
+                    // For third country credit notes with VAT, ensure we have a VAT account
+                    let ddvVatAccount = accounts.vat;
+                    if (!ddvVatAccount && isCreditNote && countryType === 'third') {
+                        const overrides = getManualOverrides();
+                        ddvVatAccount = overrides.domesticVAT || '26000'; // Use domestic VAT for corrections
+                    }
+                    
                     xml += '      <DDV>\n';
                     xml += '        <DDVVrstica>\n';
                     xml += '          <DDVGlava>\n';
@@ -1849,7 +1859,7 @@
                 console.log('XML length:', generatedXML.length);
                 
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = `minimax_invoices_v2.16_${timestamp}.xml`;
+                const filename = `minimax_invoices_v2.17_${timestamp}.xml`;
                 
                 console.log('Attempting download with filename:', filename);
                 
@@ -1996,7 +2006,7 @@
                         </button>
                     </div>
                     <div style="background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;">
-                        <strong>📁 Save as:</strong> minimax_invoices_v2.16_${new Date().toISOString().split('T')[0]}.xml
+                        <strong>📁 Save as:</strong> minimax_invoices_v2.17_${new Date().toISOString().split('T')[0]}.xml
                     </div>
                     <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(generatedXML)}</pre>
                 `;
