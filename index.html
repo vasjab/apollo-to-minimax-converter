@@ -534,7 +534,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #48bb78;">
                         <strong>🇸🇮 Slovenia (Domestic)</strong><br>
-                        <small id="domesticPreview">Receivables: 1200 | Revenue: 7620 | VAT: 26070</small>
+                        <small id="domesticPreview">Receivables: 1200 | Revenue: 7620 | VAT: 26000</small>
                     </div>
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #4299e1;">
                         <strong>🇪🇺 EU Countries</strong><br>
@@ -641,11 +641,11 @@
         // Version information
         console.log('Minimax XML Converter v2.10 loaded');
         console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, Integer VAT Rates for OSS');
-        console.log('Last updated: January 7, 2025');
+        console.log('Last updated: June 25, 2025');
         
         // Fixed timestamp when code was generated
         function updateTimestamp() {
-            const timestamp = "January 7, 2025 at 11:15 AM";
+            const timestamp = "June 25, 2025 at 11:15 AM";
             const timestampElement = document.getElementById('updateTimestamp');
             if (timestampElement) {
                 timestampElement.textContent = timestamp;
@@ -1522,7 +1522,7 @@
             const accounts = {
                 receivables: '1200',  // Default
                 revenue: '7620',      // Default
-                vat: '26070'          // Default
+                vat: '26000'          // Default
             };
             
             // Check for manual overrides first
@@ -1531,7 +1531,7 @@
             if (countryType === 'domestic') {
                 // Slovenia - domestic accounts
                 accounts.receivables = overrides.domesticReceivables || '1200';
-                accounts.vat = overrides.domesticVAT || '26070';
+                accounts.vat = overrides.domesticVAT || '26000';
                 
                 if (overrides.domesticRevenue) {
                     accounts.revenue = overrides.domesticRevenue;
