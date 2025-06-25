@@ -533,15 +533,15 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #48bb78;">
                         <strong>🇸🇮 Slovenia (Domestic)</strong><br>
-                        <small id="domesticPreview">Receivables: 1200 | Revenue: 7600 | VAT: 26070</small>
+                        <small id="domesticPreview">Receivables: 1200 | Revenue: 7620 | VAT: 26070</small>
                     </div>
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #4299e1;">
                         <strong>🇪🇺 EU Countries</strong><br>
-                        <small id="euPreview">Receivables: 1211 | Revenue: 76101 | VAT: 26071 (OSS)</small>
+                        <small id="euPreview">Receivables: 1211 | Revenue: 76301 | VAT: 26071 (OSS)</small>
                     </div>
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #ed8936;">
                         <strong>🌍 Third Countries</strong><br>
-                        <small id="thirdPreview">Receivables: 1210 | Revenue: 76102 | VAT: No VAT</small>
+                        <small id="thirdPreview">Receivables: 1210 | Revenue: 76302 | VAT: No VAT</small>
                     </div>
                 </div>
                 <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;">Revenue accounts automatically selected based on business type and customer country. You can override these below.</p>
@@ -642,17 +642,9 @@
         console.log('Features: DDV Book Support, Credit Notes, Smart Account Selection, Hash-based Customer Codes, ISO Country Codes, Fixed OSS VAT Rates');
         console.log('Last updated:', new Date().toLocaleString());
         
-        // Update timestamp dynamically
+        // Fixed timestamp when code was generated
         function updateTimestamp() {
-            const now = new Date();
-            const timestamp = now.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            }) + ' at ' + now.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
+            const timestamp = "January 7, 2025 at 10:45 AM";
             const timestampElement = document.getElementById('updateTimestamp');
             if (timestampElement) {
                 timestampElement.textContent = timestamp;
@@ -1528,7 +1520,7 @@
         function getAccountsByCountryType(countryType, businessType) {
             const accounts = {
                 receivables: '1200',  // Default
-                revenue: '7600',      // Default
+                revenue: '7620',      // Default
                 vat: '26070'          // Default
             };
             
@@ -1545,19 +1537,19 @@
                 } else {
                     switch (businessType) {
                         case 'products':
-                            accounts.revenue = '7600';
+                            accounts.revenue = '7620';
                             break;
                         case 'services':
                             accounts.revenue = '7601';
                             break;
                         case 'goods':
-                            accounts.revenue = '7620';
+                            accounts.revenue = '7600';
                             break;
                         case 'materials':
                             accounts.revenue = '7621';
                             break;
                         default:
-                            accounts.revenue = '7600';
+                            accounts.revenue = '7620';
                     }
                 }
             } else if (countryType === 'eu') {
@@ -1570,19 +1562,19 @@
                 } else {
                     switch (businessType) {
                         case 'products':
-                            accounts.revenue = '76101';
+                            accounts.revenue = '76301';
                             break;
                         case 'services':
                             accounts.revenue = '76111';
                             break;
                         case 'goods':
-                            accounts.revenue = '76301';
+                            accounts.revenue = '76101';
                             break;
                         case 'materials':
                             accounts.revenue = '76311';
                             break;
                         default:
-                            accounts.revenue = '76101';
+                            accounts.revenue = '76301';
                     }
                 }
             } else {
@@ -1595,19 +1587,19 @@
                 } else {
                     switch (businessType) {
                         case 'products':
-                            accounts.revenue = '76102';
+                            accounts.revenue = '76302';
                             break;
                         case 'services':
                             accounts.revenue = '76112';
                             break;
                         case 'goods':
-                            accounts.revenue = '76302';
+                            accounts.revenue = '76102';
                             break;
                         case 'materials':
                             accounts.revenue = '76312';
                             break;
                         default:
-                            accounts.revenue = '76102';
+                            accounts.revenue = '76302';
                     }
                 }
             }
