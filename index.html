@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.14 - Credit Notes Fix + DDV Book + VAT Detection from Excel Headers</title>
+    <title>Minimax Invoice XML Converter v2.15 - Credit Notes Fix (DDV Book) + DDV Book + VAT Detection from Excel Headers</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -383,7 +383,7 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.14</strong> | Last updated: <span id="updateTimestamp"></span> | <span style="color: #48bb78;">✓ Credit Notes Fix</span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ VAT Detection from Excel Headers</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
+                <strong>Version 2.15</strong> | Last updated: <span id="updateTimestamp"></span> | <span style="color: #48bb78;">✓ Credit Notes Fix (DDV Book)</span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ VAT Detection from Excel Headers</span> | <span style="color: #48bb78;">✓ ISO Country Codes</span>
             </div>
         </div>
         
@@ -393,9 +393,10 @@
             <p style="margin-top: 10px;"><strong>🎯 Automatic VAT Rate Detection:</strong> The converter automatically detects VAT rates from your Excel column headers. If your VAT amount is in column AD with header "20%", it will use 20% as the VAT rate. This works for any column and supports multiple VAT columns in the same file.</p>
             <p style="margin-top: 10px;"><strong>📊 Flexible Excel Format:</strong> Your Excel files can have VAT amounts in different columns - the converter will automatically find them and extract the correct VAT rates from the headers above each VAT column.</p>
             <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.14:</strong> 
+                <strong style="color: #16a34a;">🆕 New in v2.15:</strong> 
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                    <li><strong>Credit Notes Fix</strong> - Proper handling of negative amounts in revenue and VAT entries</li>
+                    <li><strong>Credit Notes Fix (DDV Book)</strong> - Negative amounts now shown correctly in DDV book for credit notes</li>
+                    <li><strong>Credit Notes Fix (Journal)</strong> - Proper handling of negative amounts in revenue and VAT entries</li>
                     <li><strong>Automatic VAT Detection from Excel Headers</strong> - No manual configuration needed!</li>
                     <li><strong>Multi-Column VAT Support</strong> - Handles Excel files with multiple VAT columns automatically</li>
                     <li><strong>Smart Column Matching</strong> - Matches VAT amounts to their respective column headers for accurate rates</li>
@@ -627,8 +628,8 @@
         
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.14</strong> | Features: Credit Notes Fix + Automatic VAT Detection + DDV Book + Multi-Column Support<br>
-                <span style="color: #48bb78;">✓</span> Credit notes with proper negative amounts | 
+                <strong>Minimax XML Converter v2.15</strong> | Features: Credit Notes Fix (DDV Book) + Automatic VAT Detection + DDV Book + Multi-Column Support<br>
+                <span style="color: #48bb78;">✓</span> Credit notes with proper negative amounts (DDV book & journal) | 
                 <span style="color: #48bb78;">✓</span> Automatic VAT detection from any Excel column | 
                 <span style="color: #48bb78;">✓</span> Multi-column VAT support | 
                 <span style="color: #48bb78;">✓</span> DDV/VAT book entries | 
@@ -641,13 +642,13 @@
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.14 loaded');
-        console.log('Features: Credit Notes Fix, Automatic VAT Detection from Excel Headers, Multi-Column VAT Support, DDV Book, Smart Account Selection');
+        console.log('Minimax XML Converter v2.15 loaded');
+        console.log('Features: Credit Notes Fix (DDV Book), Credit Notes Fix (Journal), Automatic VAT Detection from Excel Headers, Multi-Column VAT Support, DDV Book, Smart Account Selection');
         console.log('Last updated: June 25, 2025');
         
         // Fixed timestamp when code was generated
         function updateTimestamp() {
-            const timestamp = "June 25, 2025 at 1:15 PM";
+            const timestamp = "June 25, 2025 at 1:30 PM";
             const timestampElement = document.getElementById('updateTimestamp');
             if (timestampElement) {
                 timestampElement.textContent = timestamp;
@@ -719,7 +720,7 @@
         // Show version notification on load
         window.addEventListener('DOMContentLoaded', function() {
             updateTimestamp();
-            showMessage('✅ Minimax XML Converter v2.14 loaded - Credit note fix + Automatic VAT detection from Excel headers!', 'info');
+            showMessage('✅ Minimax XML Converter v2.15 loaded - Credit note fix (DDV Book) + Automatic VAT detection from Excel headers!', 'info');
             
             // Test hash function examples
             console.log('Hash function examples (same name always produces same code):');
@@ -1230,7 +1231,7 @@
             }
             
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            xml += '<!-- Generated by Minimax XML Converter v2.14 - Credit Notes Fix + Automatic VAT Detection from Excel + DDV Book + ISO Country Codes -->\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.15 - Credit Notes Fix (DDV Book) + Automatic VAT Detection from Excel + DDV Book + ISO Country Codes -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
@@ -1362,7 +1363,7 @@
                 
                 // Debug for first record
                 if (index === 0) {
-                    console.log('=== Minimax XML Converter v2.14 Debug Info ===');
+                    console.log('=== Minimax XML Converter v2.15 Debug Info ===');
                     console.log('Account selection for first record:');
                     console.log('Customer:', row['Name']);
                     console.log('Customer code:', customerCode || 'Not included');
@@ -1419,13 +1420,16 @@
                     xml += `              <SifraStopnjeDDV>${vatRateCode}</SifraStopnjeDDV>\n`;
                     
                     // For services vs goods, use appropriate fields
-                    // Note: DDV book typically shows absolute values
+                    // For credit notes, keep negative values in DDV book
+                    const ddvOsnova = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
+                    const ddvAmount = isCreditNote ? taxAmount.toFixed(2) : Math.abs(taxAmount).toFixed(2);
+                    
                     if (settings.businessType === 'services') {
-                        xml += `              <StoritevOsnova>${Math.abs(netAmount).toFixed(2)}</StoritevOsnova>\n`;
-                        xml += `              <StoritevDDV>${Math.abs(taxAmount).toFixed(2)}</StoritevDDV>\n`;
+                        xml += `              <StoritevOsnova>${ddvOsnova}</StoritevOsnova>\n`;
+                        xml += `              <StoritevDDV>${ddvAmount}</StoritevDDV>\n`;
                     } else {
-                        xml += `              <Osnova>${Math.abs(netAmount).toFixed(2)}</Osnova>\n`;
-                        xml += `              <DDV>${Math.abs(taxAmount).toFixed(2)}</DDV>\n`;
+                        xml += `              <Osnova>${ddvOsnova}</Osnova>\n`;
+                        xml += `              <DDV>${ddvAmount}</DDV>\n`;
                     }
                     
                     xml += '            </DDVStopnja>\n';
@@ -1830,7 +1834,7 @@
                 console.log('XML length:', generatedXML.length);
                 
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = `minimax_invoices_v2.14_${timestamp}.xml`;
+                const filename = `minimax_invoices_v2.15_${timestamp}.xml`;
                 
                 console.log('Attempting download with filename:', filename);
                 
@@ -1977,7 +1981,7 @@
                         </button>
                     </div>
                     <div style="background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;">
-                        <strong>📁 Save as:</strong> minimax_invoices_v2.14_${new Date().toISOString().split('T')[0]}.xml
+                        <strong>📁 Save as:</strong> minimax_invoices_v2.15_${new Date().toISOString().split('T')[0]}.xml
                     </div>
                     <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(generatedXML)}</pre>
                 `;
