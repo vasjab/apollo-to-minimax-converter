@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.17 - Third Country Credit Note DDV Section + Third Country Credit Note VAT + Credit Notes Fix</title>
+    <title>Minimax Invoice XML Converter v2.17 - Third Country Credit Note DDV Section + Third Country Credit Note VAT +
+        Credit Notes Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -12,41 +14,41 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.98);
             border-radius: 16px;
             padding: 32px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
         }
-        
+
         .header {
             text-align: center;
             margin-bottom: 40px;
         }
-        
+
         .header h1 {
             color: #2d3748;
             font-size: 2.5rem;
             font-weight: 600;
             margin-bottom: 8px;
         }
-        
+
         .header p {
             color: #718096;
             font-size: 1.1rem;
         }
-        
+
         .step {
             margin-bottom: 32px;
             padding: 24px;
@@ -54,14 +56,14 @@
             border-radius: 12px;
             border-left: 4px solid #667eea;
         }
-        
+
         .step h2 {
             color: #667eea;
             margin-bottom: 16px;
             font-size: 1.4rem;
             font-weight: 600;
         }
-        
+
         .file-upload {
             border: 2px dashed #667eea;
             border-radius: 12px;
@@ -71,40 +73,40 @@
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        
+
         .file-upload:hover {
             border-color: #5a67d8;
             background: #f7fafc;
             transform: translateY(-2px);
         }
-        
+
         .file-upload.dragover {
             border-color: #5a67d8;
             background: #ebf4ff;
         }
-        
+
         .file-upload-icon {
             font-size: 3rem;
             margin-bottom: 16px;
             color: #667eea;
         }
-        
+
         .file-upload-text {
             font-size: 1.2rem;
             font-weight: 500;
             color: #2d3748;
             margin-bottom: 8px;
         }
-        
+
         .file-upload-hint {
             color: #718096;
             font-size: 0.9rem;
         }
-        
+
         input[type="file"] {
             display: none;
         }
-        
+
         .btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
@@ -121,41 +123,41 @@
             gap: 8px;
             margin: 8px;
         }
-        
+
         .btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
-        
+
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         .btn-secondary {
             background: linear-gradient(135deg, #718096, #4a5568);
         }
-        
+
         .btn-success {
             background: linear-gradient(135deg, #48bb78, #38a169);
         }
-        
+
         .settings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
-        
+
         .setting-item {
             background: white;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
+
         .setting-item label {
             font-weight: 600;
             color: #2d3748;
@@ -163,8 +165,9 @@
             margin-bottom: 8px;
             font-size: 0.9rem;
         }
-        
-        select, input[type="text"] {
+
+        select,
+        input[type="text"] {
             width: 100%;
             padding: 10px 12px;
             border: 2px solid #e2e8f0;
@@ -173,13 +176,14 @@
             transition: border-color 0.3s ease;
             background: white;
         }
-        
-        select:focus, input[type="text"]:focus {
+
+        select:focus,
+        input[type="text"]:focus {
             border-color: #667eea;
             outline: none;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        
+
         .preview {
             background: #f7fafc;
             border-radius: 8px;
@@ -187,7 +191,7 @@
             margin-top: 20px;
             border: 1px solid #e2e8f0;
         }
-        
+
         .preview pre {
             background: white;
             padding: 16px;
@@ -199,7 +203,7 @@
             max-height: 400px;
             overflow-y: auto;
         }
-        
+
         .alert {
             padding: 16px;
             border-radius: 8px;
@@ -209,29 +213,29 @@
             gap: 12px;
             font-weight: 500;
         }
-        
+
         .alert-error {
             background: #fed7d7;
             color: #c53030;
             border: 1px solid #feb2b2;
         }
-        
+
         .alert-success {
             background: #c6f6d5;
             color: #2f855a;
             border: 1px solid #9ae6b4;
         }
-        
+
         .alert-info {
             background: #bee3f8;
             color: #2c5282;
             border: 1px solid #90cdf4;
         }
-        
+
         .hidden {
             display: none;
         }
-        
+
         .data-preview {
             margin-top: 20px;
             background: white;
@@ -239,7 +243,7 @@
             overflow: hidden;
             border: 1px solid #e2e8f0;
         }
-        
+
         .data-preview h3 {
             background: #667eea;
             color: white;
@@ -248,24 +252,25 @@
             font-size: 1rem;
             font-weight: 600;
         }
-        
+
         .table-container {
             max-height: 300px;
             overflow: auto;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 12px;
         }
-        
-        th, td {
+
+        th,
+        td {
             border: 1px solid #e2e8f0;
             padding: 8px 12px;
             text-align: left;
         }
-        
+
         th {
             background: #f7fafc;
             color: #2d3748;
@@ -274,11 +279,11 @@
             top: 0;
             z-index: 1;
         }
-        
+
         tbody tr:nth-child(even) {
             background: #f7fafc;
         }
-        
+
         .actions {
             text-align: center;
             margin-top: 32px;
@@ -287,36 +292,36 @@
             border-radius: 8px;
             border: 1px solid #e2e8f0;
         }
-        
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-top: 20px;
         }
-        
+
         .stat-item {
             background: white;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-        
+
         .stat-value {
             font-size: 2rem;
             font-weight: 700;
             color: #667eea;
             display: block;
         }
-        
+
         .stat-label {
             color: #718096;
             font-size: 0.9rem;
             margin-top: 4px;
         }
-        
+
         .info-box {
             background: linear-gradient(135deg, #ebf4ff, #e6fffa);
             border: 1px solid #90cdf4;
@@ -324,24 +329,24 @@
             padding: 20px;
             margin-bottom: 24px;
         }
-        
+
         .info-box h3 {
             color: #2c5282;
             margin-bottom: 12px;
             font-size: 1.1rem;
         }
-        
+
         .info-box p {
             color: #2d3748;
             line-height: 1.6;
         }
-        
+
         .processing {
             text-align: center;
             padding: 40px;
             color: #718096;
         }
-        
+
         .spinner {
             display: inline-block;
             width: 24px;
@@ -352,70 +357,96 @@
             animation: spin 1s ease-in-out infinite;
             margin-right: 8px;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
                 margin: 10px;
             }
-            
+
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .settings-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .stats {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.17</strong> | Last updated: <span id="updateTimestamp"></span> | <span style="color: #48bb78;">✓ Third Country Credit Note DDV</span> | <span style="color: #48bb78;">✓ Credit Notes Fix</span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span style="color: #48bb78;">✓ VAT Detection</span>
+                <strong>Version 2.17</strong> | Last updated: <span id="updateTimestamp"></span> | <span
+                    style="color: #48bb78;">✓ Third Country Credit Note DDV</span> | <span style="color: #48bb78;">✓
+                    Credit Notes Fix</span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span
+                    style="color: #48bb78;">✓ VAT Detection</span>
             </div>
         </div>
-        
+
         <div class="info-box">
             <h3>✅ Smart Account Selection & Automatic VAT Detection</h3>
-            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and business type. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper invoice processing. It intelligently maps accounts for domestic (Slovenia), EU, and third-country transactions.</p>
-            <p style="margin-top: 10px;"><strong>🎯 Automatic VAT Rate Detection:</strong> The converter automatically detects VAT rates from your Excel column headers. If your VAT amount is in column AD with header "20%", it will use 20% as the VAT rate. This works for any column and supports multiple VAT columns in the same file.</p>
-            <p style="margin-top: 10px;"><strong>📊 Flexible Excel Format:</strong> Your Excel files can have VAT amounts in different columns - the converter will automatically find them and extract the correct VAT rates from the headers above each VAT column.</p>
-            <p style="margin-top: 10px;"><strong>🔧 Credit Note VAT Corrections:</strong> For credit notes issued to third countries (non-EU), VAT is included if present in the Excel data. This allows you to correct previous VAT errors by using the domestic VAT account (26000) for the correction entry.</p>
-            <div style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.17:</strong> 
+            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and
+                business type. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper
+                invoice processing. It intelligently maps accounts for domestic (Slovenia), EU, and third-country
+                transactions.</p>
+            <p style="margin-top: 10px;"><strong>🎯 Automatic VAT Rate Detection:</strong> The converter automatically
+                detects VAT rates from your Excel column headers. If your VAT amount is in column AD with header "20%",
+                it will use 20% as the VAT rate. This works for any column and supports multiple VAT columns in the same
+                file.</p>
+            <p style="margin-top: 10px;"><strong>📊 Flexible Excel Format:</strong> Your Excel files can have VAT
+                amounts in different columns - the converter will automatically find them and extract the correct VAT
+                rates from the headers above each VAT column.</p>
+            <p style="margin-top: 10px;"><strong>🔧 Credit Note VAT Corrections:</strong> For credit notes issued to
+                third countries (non-EU), VAT is included if present in the Excel data. This allows you to correct
+                previous VAT errors by using the domestic VAT account (26000) for the correction entry.</p>
+            <div
+                style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
+                <strong style="color: #16a34a;">🆕 New in v2.17:</strong>
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                    <li><strong>Third Country Credit Note DDV Section</strong> - DDV book entries now included for third country credit notes with VAT</li>
-                    <li><strong>Third Country Credit Note VAT</strong> - VAT included on credit notes for non-EU countries to correct previous errors</li>
-                    <li><strong>Credit Notes Fix (DDV Book)</strong> - Negative amounts now shown correctly in DDV book for credit notes</li>
-                    <li><strong>Credit Notes Fix (Journal)</strong> - Proper handling of negative amounts in revenue and VAT entries</li>
-                    <li><strong>Automatic VAT Detection from Excel Headers</strong> - No manual configuration needed!</li>
-                    <li><strong>Multi-Column VAT Support</strong> - Handles Excel files with multiple VAT columns automatically</li>
-                    <li><strong>Smart Column Matching</strong> - Matches VAT amounts to their respective column headers for accurate rates</li>
-                    <li><strong>Flexible Format Support</strong> - Works with headers like "20%", "VAT 21%", "Tax 19%", etc.</li>
+                    <li><strong>Third Country Credit Note DDV Section</strong> - DDV book entries now included for third
+                        country credit notes with VAT</li>
+                    <li><strong>Third Country Credit Note VAT</strong> - VAT included on credit notes for non-EU
+                        countries to correct previous errors</li>
+                    <li><strong>Credit Notes Fix (DDV Book)</strong> - Negative amounts now shown correctly in DDV book
+                        for credit notes</li>
+                    <li><strong>Credit Notes Fix (Journal)</strong> - Proper handling of negative amounts in revenue and
+                        VAT entries</li>
+                    <li><strong>Automatic VAT Detection from Excel Headers</strong> - No manual configuration needed!
+                    </li>
+                    <li><strong>Multi-Column VAT Support</strong> - Handles Excel files with multiple VAT columns
+                        automatically</li>
+                    <li><strong>Smart Column Matching</strong> - Matches VAT amounts to their respective column headers
+                        for accurate rates</li>
+                    <li><strong>Flexible Format Support</strong> - Works with headers like "20%", "VAT 21%", "Tax 19%",
+                        etc.</li>
                     <li>All previous features: Decimal VAT rates, OSS support, DDV book, ISO country codes</li>
                 </ul>
             </div>
         </div>
-        
+
         <!-- Step 1: Upload File -->
         <div class="step">
             <h2>📁 Step 1: Upload Your Invoice Export</h2>
             <p style="color: #718096; font-size: 0.9rem; margin-bottom: 20px;">
                 Required columns: Number, Name, Date, Date due, Total, Total w/ tax<br>
                 Optional columns: Type (for credit notes), Tax number, Country, Address, City, Postal code<br>
-                <strong>Note:</strong> VAT rates are automatically detected from column headers (e.g., "20%", "VAT 21%", etc.)
+                <strong>Note:</strong> VAT rates are automatically detected from column headers (e.g., "20%", "VAT 21%",
+                etc.)
             </p>
             <div class="file-upload" id="fileUpload">
                 <div class="file-upload-icon">📊</div>
@@ -426,7 +457,7 @@
             <div id="dataPreview" class="data-preview hidden"></div>
             <div id="dataStats" class="stats hidden"></div>
         </div>
-        
+
         <!-- Step 2: Settings -->
         <div class="step hidden" id="settingsStep">
             <h2>⚙️ Step 2: Configure XML Settings</h2>
@@ -440,7 +471,7 @@
                         <option value="FT">FT - Financial Document</option>
                     </select>
                 </div>
-                
+
                 <div class="setting-item">
                     <label for="businessType">Business Type</label>
                     <select id="businessType">
@@ -450,7 +481,7 @@
                         <option value="materials">Materials (Material)</option>
                     </select>
                 </div>
-                
+
                 <div class="setting-item">
                     <label for="includeCustomers">Include Customer Data</label>
                     <select id="includeCustomers">
@@ -458,10 +489,11 @@
                         <option value="false">No - Only transactions</option>
                     </select>
                     <p style="font-size: 0.8rem; color: #718096; margin-top: 5px;">
-                        When set to "No", the SifraStranke field is omitted from journal entries. Minimax will use existing customers based on other data (invoice number, tax ID, etc.).
+                        When set to "No", the SifraStranke field is omitted from journal entries. Minimax will use
+                        existing customers based on other data (invoice number, tax ID, etc.).
                     </p>
                 </div>
-                
+
                 <div class="setting-item" id="customerCodeLogicContainer">
                     <label for="customerCodeLogic">Customer Code Generation</label>
                     <select id="customerCodeLogic">
@@ -472,7 +504,7 @@
                         <option value="manual">Manual prefix only</option>
                     </select>
                 </div>
-                
+
                 <div class="setting-item" id="customerCodePrefixContainer">
                     <label for="customerCodePrefix">Customer Code Prefix</label>
                     <input type="text" id="customerCodePrefix" value="C" placeholder="e.g., C">
@@ -480,7 +512,7 @@
                         For hash method, prefix is optional. For others, it's added before the code.
                     </p>
                 </div>
-                
+
                 <div class="setting-item">
                     <label for="homeCountry">Home Country</label>
                     <select id="homeCountry">
@@ -489,7 +521,7 @@
                         <option value="Austria">Austria</option>
                     </select>
                 </div>
-                
+
                 <div class="setting-item">
                     <label for="countryColumn">Country Column</label>
                     <select id="countryColumn">
@@ -499,7 +531,7 @@
                         <option value="Billing Country">Billing Country</option>
                     </select>
                 </div>
-                
+
                 <div class="setting-item">
                     <label for="defaultVATRate">Default VAT Rate (Fallback)</label>
                     <select id="defaultVATRate">
@@ -515,28 +547,35 @@
                     </p>
                 </div>
             </div>
-            
-            <div id="customerWarning" style="margin-top: 20px; padding: 15px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px;">
+
+            <div id="customerWarning"
+                style="margin-top: 20px; padding: 15px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px;">
                 <h3 style="color: #92400e; margin-bottom: 10px;">⚠️ Important: Customer Import</h3>
                 <p style="color: #92400e; font-size: 0.9rem; line-height: 1.6;">
-                    <strong>Tip:</strong> Use "Hash of Name" method to prevent duplicate customer codes. The same customer name will always generate the same code, so importing the same customer multiple times won't create duplicates in Minimax.
+                    <strong>Tip:</strong> Use "Hash of Name" method to prevent duplicate customer codes. The same
+                    customer name will always generate the same code, so importing the same customer multiple times
+                    won't create duplicates in Minimax.
                 </p>
                 <p style="color: #92400e; font-size: 0.85rem; margin-top: 10px;">
                     Customer code generation options:
                 </p>
                 <ul style="margin: 8px 0 0 20px; font-size: 0.85rem; color: #92400e;">
-                    <li><strong>Hash of Name:</strong> Creates unique 6-8 char code from name (same name = same code)<br>
-                        <span style="font-size: 0.8rem; color: #666;">Example: The same customer name will always generate the same code</span></li>
+                    <li><strong>Hash of Name:</strong> Creates unique 6-8 char code from name (same name = same
+                        code)<br>
+                        <span style="font-size: 0.8rem; color: #666;">Example: The same customer name will always
+                            generate the same code</span>
+                    </li>
                     <li><strong>Tax Number:</strong> Uses customer's tax ID (good for uniqueness)</li>
                     <li><strong>Name-based:</strong> Creates code from customer name</li>
                     <li><strong>Timestamp:</strong> Adds unique timestamp to prevent duplicates</li>
                     <li><strong>Manual:</strong> Uses your prefix + sequential numbers (may cause duplicates)</li>
                 </ul>
             </div>
-            
+
             <div class="info-box" style="margin-top: 20px;">
                 <h3>📊 Account Mapping Preview</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #48bb78;">
                         <strong>🇸🇮 Slovenia (Domestic)</strong><br>
                         <small id="domesticPreview">Receivables: 1200 | Revenue: 7620 | VAT: 26000</small>
@@ -550,9 +589,10 @@
                         <small id="thirdPreview">Receivables: 1210 | Revenue: 76302 | VAT: No VAT</small>
                     </div>
                 </div>
-                <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;">Revenue accounts automatically selected based on business type and customer country. You can override these below.</p>
+                <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;">Revenue accounts automatically selected
+                    based on business type and customer country. You can override these below.</p>
             </div>
-            
+
             <div style="margin-top: 20px;">
                 <h3 style="color: #667eea; margin-bottom: 15px;">🔧 Manual Account Overrides (Optional)</h3>
                 <div class="settings-grid">
@@ -568,7 +608,7 @@
                         <label>🇸🇮 Domestic VAT</label>
                         <input type="text" id="domesticVAT" placeholder="Auto: 26000">
                     </div>
-                    
+
                     <div class="setting-item">
                         <label>🇪🇺 EU Receivables</label>
                         <input type="text" id="euReceivables" placeholder="Auto: 1211">
@@ -581,7 +621,7 @@
                         <label>🇪🇺 EU VAT</label>
                         <input type="text" id="euVAT" placeholder="Auto: 26071 (OSS)">
                     </div>
-                    
+
                     <div class="setting-item">
                         <label>🌍 Third Country Receivables</label>
                         <input type="text" id="thirdReceivables" placeholder="Auto: 1210">
@@ -595,10 +635,11 @@
                         <input type="text" id="thirdVAT" placeholder="Auto: No VAT (leave empty)">
                     </div>
                 </div>
-                <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;">Leave fields empty to use automatic selection. Fill in to override specific accounts.</p>
+                <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;">Leave fields empty to use automatic
+                    selection. Fill in to override specific accounts.</p>
             </div>
         </div>
-        
+
         <!-- Step 3: Generate XML -->
         <div class="step hidden" id="xmlStep">
             <h2>🚀 Step 3: Generate and Download XML</h2>
@@ -616,7 +657,8 @@
                     <span>👁️</span> Preview XML
                 </button>
             </div>
-            <div id="downloadInfo" class="hidden" style="margin-top: 15px; padding: 15px; background: #e8f4fd; border: 1px solid #b3d9ff; border-radius: 8px; font-size: 0.9rem;">
+            <div id="downloadInfo" class="hidden"
+                style="margin-top: 15px; padding: 15px; background: #e8f4fd; border: 1px solid #b3d9ff; border-radius: 8px; font-size: 0.9rem;">
                 <strong>💡 Multiple Options:</strong>
                 <ul style="margin: 10px 0 0 20px; line-height: 1.6;">
                     <li><strong>Download:</strong> Direct file download (works in most browsers)</li>
@@ -626,18 +668,19 @@
             </div>
             <div id="xmlPreview" class="preview hidden"></div>
         </div>
-        
+
         <div id="messages"></div>
-        
+
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.17</strong> | Features: Third Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book<br>
-                <span style="color: #48bb78;">✓</span> Third country credit note DDV sections | 
-                <span style="color: #48bb78;">✓</span> Third country credit note VAT corrections | 
-                <span style="color: #48bb78;">✓</span> Credit notes with proper negative amounts | 
-                <span style="color: #48bb78;">✓</span> Automatic VAT detection from any Excel column | 
-                <span style="color: #48bb78;">✓</span> Multi-column VAT support | 
-                <span style="color: #48bb78;">✓</span> DDV/VAT book entries | 
+                <strong>Minimax XML Converter v2.17</strong> | Features: Third Country Credit Note DDV + Third Country
+                Credit Note VAT + Credit Notes Fix + DDV Book<br>
+                <span style="color: #48bb78;">✓</span> Third country credit note DDV sections |
+                <span style="color: #48bb78;">✓</span> Third country credit note VAT corrections |
+                <span style="color: #48bb78;">✓</span> Credit notes with proper negative amounts |
+                <span style="color: #48bb78;">✓</span> Automatic VAT detection from any Excel column |
+                <span style="color: #48bb78;">✓</span> Multi-column VAT support |
+                <span style="color: #48bb78;">✓</span> DDV/VAT book entries |
                 <span style="color: #48bb78;">✓</span> Smart country detection |
                 <span style="color: #48bb78;">✓</span> Duplicate prevention |
                 <span style="color: #48bb78;">✓</span> ISO country codes
@@ -650,7 +693,7 @@
         console.log('Minimax XML Converter v2.17 loaded');
         console.log('Features: Third Country Credit Note DDV Section, Third Country Credit Note VAT, Credit Notes Fix (DDV Book & Journal), Automatic VAT Detection, Multi-Column VAT Support, DDV Book, Smart Account Selection');
         console.log('Last updated: June 25, 2025');
-        
+
         // Fixed timestamp when code was generated
         function updateTimestamp() {
             const timestamp = "June 25, 2025 at 2:00 PM";
@@ -659,7 +702,7 @@
                 timestampElement.textContent = timestamp;
             }
         }
-        
+
         // Standard EU VAT rates (as of 2025)
         const EU_VAT_RATES = {
             'AT': 20,    // Austria
@@ -690,43 +733,43 @@
             'ES': 21,    // Spain
             'SE': 25     // Sweden
         };
-        
+
         // Simple hash function to create consistent short codes
         function simpleHash(str) {
             let hash = 0;
             let hash2 = 0;
-            
+
             // Use two different hash calculations for better distribution
             for (let i = 0; i < str.length; i++) {
                 const char = str.charCodeAt(i);
                 hash = ((hash << 5) - hash) + char;
                 hash = hash & hash; // Convert to 32-bit integer
-                
+
                 // Second hash using different multiplier
                 hash2 = ((hash2 << 3) + hash2) + char;
                 hash2 = hash2 & hash2;
             }
-            
+
             // Combine both hashes for better uniqueness
             const combined = Math.abs(hash) + Math.abs(hash2);
-            
+
             // Convert to base36 for alphanumeric code (0-9, A-Z)
             let code = combined.toString(36).toUpperCase();
-            
+
             // Ensure minimum length and pad if needed
             while (code.length < 6) {
                 code = '0' + code;
             }
-            
+
             // Return first 8 characters (or full code if shorter)
             return code.substring(0, 8);
         }
-        
+
         // Show version notification on load
-        window.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             updateTimestamp();
             showMessage('✅ Minimax XML Converter v2.17 loaded - Third country credit note DDV section fix + Automatic VAT detection!', 'info');
-            
+
             // Test hash function examples
             console.log('Hash function examples (same name always produces same code):');
             console.log('  "ACME Corp" → "' + simpleHash('ACME Corp'.toUpperCase()) + '"');
@@ -736,26 +779,26 @@
             console.log('  "XYZ Solutions" → "' + simpleHash('XYZ Solutions'.toUpperCase()) + '"');
             console.log('Note: Importing the same customer multiple times will use the same code.');
         });
-        
+
         let invoiceData = [];
         let generatedXML = '';
         let columnHeaders = {}; // Store column headers
-        
+
         // File upload handling
         document.getElementById('dataFile').addEventListener('change', handleFileSelect);
-        
+
         const fileUpload = document.getElementById('fileUpload');
         fileUpload.addEventListener('click', () => document.getElementById('dataFile').click());
         fileUpload.addEventListener('dragover', handleDragOver);
         fileUpload.addEventListener('drop', handleFileDrop);
         fileUpload.addEventListener('dragenter', e => e.preventDefault());
         fileUpload.addEventListener('dragleave', e => fileUpload.classList.remove('dragover'));
-        
+
         function handleDragOver(e) {
             e.preventDefault();
             fileUpload.classList.add('dragover');
         }
-        
+
         function handleFileDrop(e) {
             e.preventDefault();
             fileUpload.classList.remove('dragover');
@@ -764,24 +807,24 @@
                 processFile(files[0]);
             }
         }
-        
+
         function handleFileSelect(e) {
             const file = e.target.files[0];
             if (file) {
                 processFile(file);
             }
         }
-        
+
         function processFile(file) {
             if (file.size > 30 * 1024 * 1024) {
                 showMessage('File size exceeds 30MB limit. Please use a smaller file.', 'error');
                 return;
             }
-            
+
             showProcessing('Reading file...');
-            
+
             const fileExtension = file.name.split('.').pop().toLowerCase();
-            
+
             if (fileExtension === 'csv') {
                 processCSV(file);
             } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
@@ -791,54 +834,54 @@
                 showMessage('Please upload a CSV or Excel file (.csv, .xlsx, .xls)', 'error');
             }
         }
-        
+
         function processCSV(file) {
             Papa.parse(file, {
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
-                complete: function(results) {
+                complete: function (results) {
                     hideProcessing();
                     if (results.errors.length > 0) {
                         showMessage('Error parsing CSV: ' + results.errors[0].message, 'error');
                         return;
                     }
-                    
+
                     invoiceData = results.data;
                     displayDataPreview();
                     showSettings();
                     showMessage(`✅ CSV file loaded successfully! Found ${invoiceData.length} records.`, 'success');
                 },
-                error: function(error) {
+                error: function (error) {
                     hideProcessing();
                     showMessage('Error reading CSV file: ' + error.message, 'error');
                 }
             });
         }
-        
+
         function processExcel(file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
+                    const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    
+
                     // Extract headers to check for VAT rate info
                     const range = XLSX.utils.decode_range(worksheet['!ref']);
                     columnHeaders = {};
                     let vatRatesByColumn = {}; // Store VAT rates found in headers by column
-                    
+
                     console.log('=== VAT Column Detection ===');
                     for (let col = range.s.c; col <= range.e.c; col++) {
-                        const headerCell = worksheet[XLSX.utils.encode_cell({r: 0, c: col})];
+                        const headerCell = worksheet[XLSX.utils.encode_cell({ r: 0, c: col })];
                         if (headerCell && headerCell.v) {
                             const headerText = String(headerCell.v);
                             // Store the column letter for each header
                             const colLetter = XLSX.utils.encode_col(col);
                             columnHeaders[headerText] = colLetter;
-                            
+
                             // Check if header contains VAT percentage info
                             // Support various formats: "20%", "VAT 20%", "Tax 21%", "19% VAT", etc.
                             const vatMatch = headerText.match(/(\d+(?:\.\d+)?)\s*%/);
@@ -850,14 +893,14 @@
                     }
                     console.log(`Total VAT columns found: ${Object.keys(vatRatesByColumn).length}`);
                     console.log('========================');
-                    
+
                     // Convert to JSON with proper date handling
                     invoiceData = XLSX.utils.sheet_to_json(worksheet, {
                         raw: false,
                         dateNF: 'yyyy-mm-dd',
                         defval: '' // Include empty cells
                     });
-                    
+
                     // Enhance invoice data with VAT rates from headers
                     // We need to map each row's VAT amount back to its column to get the rate
                     invoiceData = invoiceData.map((row, rowIndex) => {
@@ -865,24 +908,24 @@
                         if (!row['Name'] && !row['Total'] && !row['Total w/ tax']) {
                             return row;
                         }
-                        
+
                         // Find which column contains the VAT amount by checking for tax-related values
                         const grossAmount = parseFloat(row['Total w/ tax'] || 0);
                         const netAmount = parseFloat(row['Total'] || 0);
                         const calculatedVAT = grossAmount - netAmount;
-                        
+
                         // Store all found VAT rates for this row (in case there are multiple)
                         const vatRatesFound = [];
-                        
+
                         // Look for columns that contain values close to the calculated VAT
                         for (let col = range.s.c; col <= range.e.c; col++) {
-                            const cellAddress = XLSX.utils.encode_cell({r: rowIndex + 1, c: col}); // +1 for header row
+                            const cellAddress = XLSX.utils.encode_cell({ r: rowIndex + 1, c: col }); // +1 for header row
                             const cell = worksheet[cellAddress];
                             if (cell && cell.v) {
                                 const cellValue = parseFloat(cell.v);
                                 // Check if this cell value matches the calculated VAT (within small tolerance)
                                 // Use Math.abs to handle both positive and negative VAT (credit notes)
-                                if (!isNaN(cellValue) && !isNaN(calculatedVAT) && 
+                                if (!isNaN(cellValue) && !isNaN(calculatedVAT) &&
                                     Math.abs(Math.abs(cellValue) - Math.abs(calculatedVAT)) < 0.01) {
                                     const colLetter = XLSX.utils.encode_col(col);
                                     if (vatRatesByColumn[colLetter]) {
@@ -897,7 +940,7 @@
                                 }
                             }
                         }
-                        
+
                         // If we found VAT rates, use the first one (or the most appropriate one)
                         if (vatRatesFound.length > 0) {
                             // Use the first found rate, or the one that best matches the calculated VAT
@@ -906,10 +949,10 @@
                                 console.log(`Row ${rowIndex + 1}: Found ${vatRatesFound.length} potential VAT columns, using rate ${row._vatRateFromHeader}% from column ${vatRatesFound[0].column}`);
                             }
                         }
-                        
+
                         return row;
                     });
-                    
+
                     // Clean up and process data
                     invoiceData = invoiceData.map(row => {
                         const cleanRow = {};
@@ -920,53 +963,53 @@
                         });
                         return cleanRow;
                     }).filter(row => Object.keys(row).length > 0);
-                    
+
                     // Store the VAT rates by column for later use
                     invoiceData.vatRatesByColumn = vatRatesByColumn;
-                    
+
                     hideProcessing();
                     displayDataPreview();
                     showSettings();
                     showMessage(`✅ Excel file loaded successfully! Found ${invoiceData.length} records.`, 'success');
-                    
+
                 } catch (error) {
                     hideProcessing();
                     showMessage('Error reading Excel file: ' + error.message, 'error');
                 }
             };
-            reader.onerror = function() {
+            reader.onerror = function () {
                 hideProcessing();
                 showMessage('Error reading file. Please try again.', 'error');
             };
             reader.readAsArrayBuffer(file);
         }
-        
+
         // Function to extract VAT rate from column header or data
         function getVATRateFromData(row, columnHeaders) {
             // First check if we found a VAT rate from the header during Excel processing
             if (row._vatRateFromHeader) {
                 return row._vatRateFromHeader;
             }
-            
+
             // If no VAT rate was found from Excel headers, return null
             // The calling function will then calculate it or use defaults
             return null;
         }
-        
+
         // Function to round VAT rate to nearest standard EU rate
         function roundToStandardVATRate(calculatedRate, countryCode) {
             // First check if we have a specific rate for this country
             if (countryCode && EU_VAT_RATES[countryCode]) {
                 return EU_VAT_RATES[countryCode];
             }
-            
+
             // All EU standard VAT rates for rounding
             const allStandardRates = [...new Set(Object.values(EU_VAT_RATES))].sort((a, b) => a - b);
-            
+
             // Find the closest standard rate
             let closestRate = allStandardRates[0];
             let minDiff = Math.abs(calculatedRate - closestRate);
-            
+
             for (const rate of allStandardRates) {
                 const diff = Math.abs(calculatedRate - rate);
                 if (diff < minDiff) {
@@ -974,38 +1017,38 @@
                     closestRate = rate;
                 }
             }
-            
+
             // If the difference is less than 0.5%, use the standard rate
             if (minDiff < 0.5) {
                 return closestRate;
             }
-            
+
             // Otherwise, round to nearest 0.5%
             return Math.round(calculatedRate * 2) / 2;
         }
-        
+
         function displayDataPreview() {
             if (invoiceData.length === 0) return;
-            
+
             const preview = document.getElementById('dataPreview');
             const stats = document.getElementById('dataStats');
-            
+
             // Calculate statistics
             const totalInvoices = invoiceData.length;
             const totalAmount = invoiceData.reduce((sum, row) => {
                 const amount = parseFloat(row['Total w/ tax'] || row['Total'] || 0);
                 return sum + (isNaN(amount) ? 0 : amount);
             }, 0);
-            
+
             const uniqueCustomers = new Set();
             invoiceData.forEach(row => {
                 if (row['Name']) uniqueCustomers.add(row['Name']);
             });
-            
-            const paidInvoices = invoiceData.filter(row => 
+
+            const paidInvoices = invoiceData.filter(row =>
                 row['Paid'] && row['Paid'].toString().toLowerCase() === 'yes'
             ).length;
-            
+
             // Display statistics
             stats.innerHTML = `
                 <div class="stat-item">
@@ -1025,16 +1068,16 @@
                     <div class="stat-label">Total Amount</div>
                 </div>
             `;
-            
+
             // Display data preview
             const headers = Object.keys(invoiceData[0]);
             const maxRows = 5;
-            
+
             let html = '<h3>📊 Data Preview (first ' + maxRows + ' rows)</h3>';
             html += '<div class="table-container"><table>';
             html += '<thead><tr>' + headers.map(h => '<th>' + escapeHtml(h) + '</th>').join('') + '</tr></thead>';
             html += '<tbody>';
-            
+
             for (let i = 0; i < Math.min(maxRows, invoiceData.length); i++) {
                 html += '<tr>';
                 headers.forEach(header => {
@@ -1044,90 +1087,90 @@
                 html += '</tr>';
             }
             html += '</tbody></table></div>';
-            
+
             preview.innerHTML = html;
             preview.classList.remove('hidden');
             stats.classList.remove('hidden');
         }
-        
+
         function showSettings() {
             document.getElementById('settingsStep').classList.remove('hidden');
             document.getElementById('xmlStep').classList.remove('hidden');
-            
+
             // Add event listeners for preview updates
             document.getElementById('businessType').addEventListener('change', updateAccountPreview);
-            
+
             // Add event listener for customer inclusion toggle
-            document.getElementById('includeCustomers').addEventListener('change', function(e) {
+            document.getElementById('includeCustomers').addEventListener('change', function (e) {
                 const showCustomerOptions = e.target.value === 'true';
                 document.getElementById('customerCodeLogicContainer').style.display = showCustomerOptions ? 'block' : 'none';
                 document.getElementById('customerCodePrefixContainer').style.display = showCustomerOptions ? 'block' : 'none';
                 document.getElementById('customerWarning').style.display = showCustomerOptions ? 'block' : 'none';
             });
-            
+
             // Add event listeners for manual override fields
             const overrideFields = [
                 'domesticReceivables', 'domesticRevenue', 'domesticVAT',
                 'euReceivables', 'euRevenue', 'euVAT',
                 'thirdReceivables', 'thirdRevenue', 'thirdVAT'
             ];
-            
+
             overrideFields.forEach(fieldId => {
                 const field = document.getElementById(fieldId);
                 if (field) {
                     field.addEventListener('input', updateAccountPreview);
                 }
             });
-            
+
             // Initial preview update
             updateAccountPreview();
         }
-        
+
         function generateXML() {
             try {
                 if (invoiceData.length === 0) {
                     showMessage('No data to process. Please upload a file first.', 'error');
                     return;
                 }
-                
+
                 showProcessing('Generating XML...');
-                
+
                 // Small delay to show processing
                 setTimeout(() => {
                     try {
                         generatedXML = createMinimaxXML(invoiceData);
-                        
+
                         if (!generatedXML || generatedXML.trim() === '') {
                             throw new Error('Generated XML is empty');
                         }
-                        
+
                         hideProcessing();
-                        
+
                         // Show all action buttons
                         document.getElementById('downloadBtn').classList.remove('hidden');
                         document.getElementById('copyBtn').classList.remove('hidden');
                         document.getElementById('previewToggle').classList.remove('hidden');
                         document.getElementById('downloadInfo').classList.remove('hidden');
-                        
+
                         // Count how many invoices have DDV segments
                         let ddvCount = 0;
                         let vatInvoicesCount = 0;
                         let ossCount = 0;
-                        
+
                         const settings = {
                             invoiceType: document.getElementById('defaultInvoiceType').value,
                             homeCountry: document.getElementById('homeCountry').value,
                             countryColumn: document.getElementById('countryColumn').value,
                             includeCustomers: document.getElementById('includeCustomers').value === 'true'
                         };
-                        
+
                         invoiceData.forEach(row => {
                             const netAmount = parseFloat(row['Total'] || 0);
                             const grossAmount = parseFloat(row['Total w/ tax'] || netAmount);
                             const taxAmount = grossAmount - netAmount;
                             const customerCountry = getCustomerCountry(row, settings.countryColumn);
                             const countryType = classifyCountry(customerCountry, settings.homeCountry);
-                            
+
                             if (Math.abs(taxAmount) > 0.001 && (countryType !== 'third' || isCreditNote)) {
                                 vatInvoicesCount++;
                                 if (settings.invoiceType === 'IR') {
@@ -1138,9 +1181,9 @@
                                 }
                             }
                         });
-                        
+
                         let message = `🎉 XML generated successfully! Created ${invoiceData.length} ${settings.invoiceType} records`;
-                        
+
                         if (settings.includeCustomers) {
                             const uniqueCustomers = new Map();
                             invoiceData.forEach(row => {
@@ -1150,7 +1193,7 @@
                         } else {
                             message += ` (customers not included)`;
                         }
-                        
+
                         if (settings.invoiceType === 'IR' && ddvCount > 0) {
                             message += ` and ${ddvCount} DDV book entries`;
                             if (ossCount > 0) {
@@ -1160,23 +1203,23 @@
                             message += ` (Note: DDV segments only included for IR type)`;
                         }
                         message += ` (${(generatedXML.length / 1024).toFixed(1)} KB)`;
-                        
+
                         showMessage(message, 'success');
-                        
+
                     } catch (error) {
                         hideProcessing();
                         showMessage('Error generating XML: ' + error.message, 'error');
                         console.error('XML Generation Error:', error);
                     }
                 }, 100);
-                
+
             } catch (error) {
                 hideProcessing();
                 showMessage('Error generating XML: ' + error.message, 'error');
                 console.error('XML Generation Error:', error);
             }
         }
-        
+
         function createMinimaxXML(data) {
             const settings = {
                 invoiceType: document.getElementById('defaultInvoiceType').value,
@@ -1188,7 +1231,7 @@
                 countryColumn: document.getElementById('countryColumn').value,
                 defaultVATRate: document.getElementById('defaultVATRate').value || 'S'
             };
-            
+
             // Function to generate unique customer code
             function generateCustomerCode(customer, index, settings) {
                 switch (settings.customerCodeLogic) {
@@ -1199,18 +1242,18 @@
                             // Add optional prefix
                             return settings.customerCodePrefix ? settings.customerCodePrefix + hash : hash;
                         }
-                        // Fall through to timestamp if no name
-                        /* falls through */
-                        
+                    // Fall through to timestamp if no name
+                    /* falls through */
+
                     case 'taxnumber':
                         // Use tax number if available, otherwise fall back to name-based
                         if (customer.taxNumber && customer.taxNumber.trim()) {
                             // Remove common prefixes like SI, AT, DE etc.
                             return customer.taxNumber.replace(/^[A-Z]{2}/i, '').trim();
                         }
-                        // Fall through to name-based if no tax number
-                        /* falls through */
-                        
+                    // Fall through to name-based if no tax number
+                    /* falls through */
+
                     case 'namebased':
                         // Create code from customer name (first 10 chars, uppercase, no spaces)
                         if (customer.name) {
@@ -1220,31 +1263,31 @@
                                 .substring(0, 20); // Limit to 20 chars
                             if (nameCode) return nameCode;
                         }
-                        // Fall through to timestamp if no valid name code
-                        /* falls through */
-                        
+                    // Fall through to timestamp if no valid name code
+                    /* falls through */
+
                     case 'timestamp':
                         // Add timestamp to make unique
                         const timestamp = new Date().getTime().toString(36).toUpperCase();
                         return settings.customerCodePrefix + timestamp + '_' + (index + 1);
-                        
+
                     case 'manual':
                     default:
                         // Use prefix with index
                         return settings.customerCodePrefix + (index + 1).toString().padStart(3, '0');
                 }
             }
-            
+
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
             xml += '<!-- Generated by Minimax XML Converter v2.17 - Third Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book + VAT Detection + ISO Country Codes -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
             xml += 'https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo.xsd">\n';
-            
+
             // Extract unique customers if enabled
             const customerMap = new Map(); // Map to track unique customers
-            
+
             if (settings.includeCustomers) {
                 data.forEach((row, index) => {
                     const customerName = row['Name'];
@@ -1254,7 +1297,7 @@
                         let finalCountry = country;
                         if (!country && row['City']) {
                             const city = row['City'].toLowerCase();
-                            if (city.includes('kopavogur') || city.includes('kópavogur') || 
+                            if (city.includes('kopavogur') || city.includes('kópavogur') ||
                                 city.includes('reykjavik') || city.includes('akureyri')) {
                                 finalCountry = 'Iceland';
                             }
@@ -1267,15 +1310,15 @@
                             country: finalCountry,
                             taxNumber: row['Tax number'] || ''
                         };
-                        
+
                         // Generate unique code for this customer
                         const customerCode = generateCustomerCode(customer, customerMap.size, settings);
                         customer.code = customerCode;
-                        
+
                         customerMap.set(customerName, customer);
                     }
                 });
-                
+
                 // Add customers section following exact schema order
                 if (customerMap.size > 0) {
                     xml += '  <Stranke>\n';
@@ -1290,14 +1333,14 @@
                         if (customer.country) {
                             // Convert country name to ISO code for better compatibility
                             let countryCode = customer.country;
-                            
+
                             // Check if it's already a 2-letter code
                             if (countryCode.length !== 2) {
                                 countryCode = COUNTRY_CODES[customer.country] || customer.country;
                             } else {
                                 countryCode = countryCode.toUpperCase();
                             }
-                            
+
                             xml += `      <KraticaDrzave>${escapeXml(countryCode)}</KraticaDrzave>\n`;
                         }
                         if (customer.postalCode) {
@@ -1316,48 +1359,48 @@
                     xml += '  </Stranke>\n';
                 }
             }
-            
+
             // Add invoices section following exact schema structure
             xml += '  <Temeljnice>\n';
             data.forEach((row, index) => {
                 const netAmount = parseFloat(row['Total'] || 0);
                 const grossAmount = parseFloat(row['Total w/ tax'] || netAmount);
                 const taxAmount = grossAmount - netAmount;
-                
+
                 // Get customer code from map if customers are included
                 let customerCode = '';
                 if (settings.includeCustomers && row['Name'] && customerMap.has(row['Name'])) {
                     customerCode = customerMap.get(row['Name']).code;
                 }
-                
+
                 // Check if this is a credit note
                 const isCreditNote = row['Type'] && row['Type'].toString().toLowerCase().includes('credit');
                 const documentPrefix = isCreditNote ? 'Credit note' : 'Invoice';
-                
+
                 // Get customer country and determine accounts
                 let customerCountry = getCustomerCountry(row, settings.countryColumn);
-                
+
                 // Special handling for Iceland cities
                 if (!customerCountry && row['City']) {
                     const city = row['City'].toLowerCase();
-                    if (city.includes('kopavogur') || city.includes('kópavogur') || 
+                    if (city.includes('kopavogur') || city.includes('kópavogur') ||
                         city.includes('reykjavik') || city.includes('akureyri')) {
                         customerCountry = 'Iceland';
                     }
                 }
-                
+
                 let countryType = classifyCountry(customerCountry, settings.homeCountry);
-                
+
                 // Special handling: if no VAT and no country detected, assume third country
                 if (!customerCountry && Math.abs(taxAmount) < 0.001) {
                     countryType = 'third';
                 }
-                
+
                 const accounts = getAccountsByCountryType(countryType, settings.businessType);
-                
+
                 // Get country ISO code
                 let countryISO = customerCountry;
-                
+
                 // Check if it's already a 2-letter ISO code
                 if (customerCountry && customerCountry.length !== 2) {
                     countryISO = COUNTRY_CODES[customerCountry] || customerCountry;
@@ -1365,7 +1408,7 @@
                     // It's likely already an ISO code, uppercase it
                     countryISO = customerCountry.toUpperCase();
                 }
-                
+
                 // Debug for first record
                 if (index === 0) {
                     console.log('=== Minimax XML Converter v2.17 Debug Info ===');
@@ -1392,16 +1435,16 @@
                     console.log('OSS journal entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will use ZnesekOsnoveVDenarniEnoti for revenue with DECIMAL VAT % (xx.xx format)' : 'Standard entry');
                     console.log('==========================================');
                 }
-                
+
                 xml += '    <Temeljnica>\n';
-                
+
                 // GlavaTemeljnice section (required structure)
                 xml += '      <GlavaTemeljnice>\n';
                 xml += `        <SifraVrsteTemeljnice>${escapeXml(settings.invoiceType)}</SifraVrsteTemeljnice>\n`;
                 xml += `        <DatumTemeljnice>${formatDate(row['Date'])}</DatumTemeljnice>\n`;
                 xml += `        <OpisGlaveTemeljnice>${escapeXml(row['Number'] || documentPrefix + ' ' + (index + 1))}</OpisGlaveTemeljnice>\n`;
                 xml += '      </GlavaTemeljnice>\n';
-                
+
                 // DDV section for VAT book entries (only for invoices with VAT)
                 // This section must be included for the DDV book to appear in Minimax
                 // For credit notes, include DDV even for third countries if VAT exists (to correct errors)
@@ -1412,7 +1455,7 @@
                         const overrides = getManualOverrides();
                         ddvVatAccount = overrides.domesticVAT || '26000'; // Use domestic VAT for corrections
                     }
-                    
+
                     xml += '      <DDV>\n';
                     xml += '        <DDVVrstica>\n';
                     xml += '          <DDVGlava>\n';
@@ -1427,20 +1470,20 @@
                     xml += '          </DDVGlava>\n';
                     xml += '          <DDVStopnje>\n';
                     xml += '            <DDVStopnja>\n';
-                    
+
                     // Determine VAT rate code for DDV section
                     let vatRateCode = settings.defaultVATRate;
-                    
+
                     // The actual percentage will be determined from Excel headers
                     // This is just for the DDV book entry type classification
-                    
+
                     xml += `              <SifraStopnjeDDV>${vatRateCode}</SifraStopnjeDDV>\n`;
-                    
+
                     // For services vs goods, use appropriate fields
                     // For credit notes, keep negative values in DDV book
                     const ddvOsnova = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
                     const ddvAmount = isCreditNote ? taxAmount.toFixed(2) : Math.abs(taxAmount).toFixed(2);
-                    
+
                     if (settings.businessType === 'services') {
                         xml += `              <StoritevOsnova>${ddvOsnova}</StoritevOsnova>\n`;
                         xml += `              <StoritevDDV>${ddvAmount}</StoritevDDV>\n`;
@@ -1448,19 +1491,19 @@
                         xml += `              <Osnova>${ddvOsnova}</Osnova>\n`;
                         xml += `              <DDV>${ddvAmount}</DDV>\n`;
                     }
-                    
+
                     xml += '            </DDVStopnja>\n';
                     xml += '          </DDVStopnje>\n';
                     xml += '        </DDVVrstica>\n';
                     xml += '      </DDV>\n';
                 }
-                
+
                 // VrsticeTemeljnice section (correct structure from schema)
                 xml += '      <VrsticeTemeljnice>\n';
-                
+
                 const invoiceDate = formatDate(row['Date']);
                 const dueDate = formatDate(row['Date due']); // Use the Date due column from Excel
-                
+
                 // Debug dates for first record
                 if (index === 0) {
                     console.log('First record dates:');
@@ -1469,7 +1512,7 @@
                     console.log('Formatted invoice date:', invoiceDate);
                     console.log('Formatted due date:', dueDate);
                 }
-                
+
                 // Receivables entry (debit) - following exact schema sequence
                 xml += '        <VrsticaTemeljnice>\n';
                 xml += `          <OpisVrsticeTemeljnice>${documentPrefix} ${escapeXml(row['Number'] || '')} - ${escapeXml(row['Name'] || '')}</OpisVrsticeTemeljnice>\n`;
@@ -1485,21 +1528,21 @@
                 }
                 xml += `          <ZnesekVBremeVDomaciDenarniEnoti>${grossAmount.toFixed(2)}</ZnesekVBremeVDomaciDenarniEnoti>\n`;
                 xml += '        </VrsticaTemeljnice>\n';
-                
+
                 // Revenue entry (credit) - following exact schema sequence
                 xml += '        <VrsticaTemeljnice>\n';
                 xml += `          <OpisVrsticeTemeljnice>Revenue - ${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
                 xml += `          <SifraKonta>${escapeXml(accounts.revenue)}</SifraKonta>\n`;
                 xml += `          <DatumOpravljanja>${invoiceDate}</DatumOpravljanja>\n`;
-                
+
                 // IMPORTANT: For credit notes, keep negative values on credit side
                 const revenueAmount = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
                 xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${revenueAmount}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
-                
+
                 // Add OSS fields for EU transactions with VAT
                 if (countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR') {
                     xml += '          <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n'; // D = Da (Yes)
-                    
+
                     // Use ISO country code - ensure we have it
                     if (countryISO && countryISO.length === 2) {
                         xml += `          <Drzava>${escapeXml(countryISO.toUpperCase())}</Drzava>\n`;
@@ -1508,10 +1551,10 @@
                         const code = COUNTRY_CODES[customerCountry] || 'EU';
                         xml += `          <Drzava>${escapeXml(code)}</Drzava>\n`;
                     }
-                    
+
                     // Calculate VAT percentage from amounts
                     let vatPercent = netAmount !== 0 ? Math.abs((taxAmount / netAmount) * 100) : 0;
-                    
+
                     // Try to get VAT rate from Excel headers first
                     const dataVatRate = getVATRateFromData(row, columnHeaders);
                     if (dataVatRate !== null) {
@@ -1526,26 +1569,26 @@
                             console.log(`Row ${index + 1}: Rounded VAT from ${originalPercent.toFixed(2)}% to ${vatPercent}% (standard rate for ${countryISO || 'EU'}). Will output as decimal: ${vatPercent.toFixed(2)}`);
                         }
                     }
-                    
+
                     // Try integer format for Odstotek if decimal format fails
                     // Uncomment the next line if Minimax rejects decimal format:
                     // xml += `          <Odstotek>${Math.round(vatPercent)}</Odstotek>\n`;
-                    
+
                     // Use decimal format (xx.00) as per schema
                     xml += `          <Odstotek>${vatPercent.toFixed(2)}</Odstotek>\n`;
-                    
+
                     // Set goods/services type - use capital first letter as per documentation
                     const goodsServices = settings.businessType === 'services' ? 'Storitev' : 'Blago';
                     xml += `          <BlagoStoritev>${goodsServices}</BlagoStoritev>\n`;
                     xml += `          <DatumDDV>${invoiceDate}</DatumDDV>\n`;
-                    
+
                     // IMPORTANT: For OSS entries, ALSO include the base amount field (in addition to the standard amount above)
                     const osnoveAmount = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
                     xml += `          <ZnesekOsnoveVDomaciDenarniEnoti>${osnoveAmount}</ZnesekOsnoveVDomaciDenarniEnoti>\n`;
                 }
-                
+
                 xml += '        </VrsticaTemeljnice>\n';
-                
+
                 // VAT entry if applicable (credit) - following exact schema sequence
                 // For credit notes, taxAmount will be negative if there's VAT
                 // For credit notes to third countries, include VAT if present (to correct previous errors)
@@ -1557,39 +1600,39 @@
                         vatAccount = overrides.domesticVAT || '26000'; // Use domestic VAT for corrections
                         console.log(`Credit note ${row['Number']}: Using domestic VAT account ${vatAccount} for third country VAT correction`);
                     }
-                    
+
                     xml += '        <VrsticaTemeljnice>\n';
                     xml += `          <OpisVrsticeTemeljnice>VAT - ${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
                     xml += `          <SifraKonta>${escapeXml(vatAccount)}</SifraKonta>\n`;
                     xml += `          <DatumOpravljanja>${invoiceDate}</DatumOpravljanja>\n`;
-                    
+
                     // NOTE: For credit notes, keep negative values on credit side
                     const vatAmount = isCreditNote ? taxAmount.toFixed(2) : Math.abs(taxAmount).toFixed(2);
                     xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${vatAmount}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
                     xml += '        </VrsticaTemeljnice>\n';
                 }
-                
+
                 xml += '      </VrsticeTemeljnice>\n';
                 xml += '    </Temeljnica>\n';
             });
-            
+
             xml += '  </Temeljnice>\n';
             xml += '</miniMAXUvozKnjigovodstvo>';
-            
+
             return xml;
         }
-        
+
         // EU countries list with mapping to ISO codes
         const EU_COUNTRIES = {
-            'Austria': 'AT', 'Belgium': 'BE', 'Bulgaria': 'BG', 'Croatia': 'HR', 
-            'Cyprus': 'CY', 'Czech Republic': 'CZ', 'Czechia': 'CZ', 'Denmark': 'DK', 'Estonia': 'EE', 
-            'Finland': 'FI', 'France': 'FR', 'Germany': 'DE', 'Greece': 'GR', 
-            'Hungary': 'HU', 'Ireland': 'IE', 'Italy': 'IT', 'Latvia': 'LV', 
-            'Lithuania': 'LT', 'Luxembourg': 'LU', 'Malta': 'MT', 'Netherlands': 'NL', 
-            'Poland': 'PL', 'Portugal': 'PT', 'Romania': 'RO', 'Slovakia': 'SK', 
+            'Austria': 'AT', 'Belgium': 'BE', 'Bulgaria': 'BG', 'Croatia': 'HR',
+            'Cyprus': 'CY', 'Czech Republic': 'CZ', 'Czechia': 'CZ', 'Denmark': 'DK', 'Estonia': 'EE',
+            'Finland': 'FI', 'France': 'FR', 'Germany': 'DE', 'Greece': 'GR',
+            'Hungary': 'HU', 'Ireland': 'IE', 'Italy': 'IT', 'Latvia': 'LV',
+            'Lithuania': 'LT', 'Luxembourg': 'LU', 'Malta': 'MT', 'Netherlands': 'NL',
+            'Poland': 'PL', 'Portugal': 'PT', 'Romania': 'RO', 'Slovakia': 'SK',
             'Slovenia': 'SI', 'Spain': 'ES', 'Sweden': 'SE'
         };
-        
+
         // Country name to ISO code mapping (extends EU list)
         const COUNTRY_CODES = {
             ...EU_COUNTRIES,
@@ -1604,10 +1647,10 @@
             'Den Haag': 'NL', 'The Hague': 'NL', // Netherlands variations
             'Kessel': 'BE', 'Pécs': 'HU', 'Salurn': 'IT' // Common city mappings
         };
-        
+
         function getCustomerCountry(row, countryColumnSetting) {
             let country = '';
-            
+
             // Auto-detect country column
             if (countryColumnSetting === 'auto') {
                 // Prefer shipping country, then billing country, then generic country
@@ -1615,13 +1658,13 @@
             } else {
                 country = row[countryColumnSetting] || '';
             }
-            
+
             // If no country found, try to detect from other fields
             if (!country) {
                 // Check if country is mentioned in city or address fields
                 const city = row['City'] || '';
                 const address = row['Address'] || '';
-                
+
                 // Check common patterns in city field
                 for (const [countryName, code] of Object.entries(COUNTRY_CODES)) {
                     if (city.toLowerCase().includes(countryName.toLowerCase()) ||
@@ -1631,57 +1674,57 @@
                     }
                 }
             }
-            
+
             return country;
         }
-        
+
         function classifyCountry(country, homeCountry) {
             if (!country) return 'domestic';
-            
+
             // Normalize country names for comparison
             const normalizedCountry = country.trim();
             const normalizedHome = homeCountry.trim();
-            
+
             // Check if it's the home country
             if (normalizedCountry.toLowerCase() === normalizedHome.toLowerCase()) {
                 return 'domestic';
             }
-            
+
             // If home country is Slovenia and country is SI (ISO code)
             if (normalizedHome.toLowerCase() === 'slovenia' && normalizedCountry.toUpperCase() === 'SI') {
                 return 'domestic';
             }
-            
+
             // Check if it's an EU country (check both full names and codes)
-            const isEU = Object.keys(EU_COUNTRIES).some(euCountry => 
+            const isEU = Object.keys(EU_COUNTRIES).some(euCountry =>
                 euCountry.toLowerCase() === normalizedCountry.toLowerCase()
-            ) || Object.values(EU_COUNTRIES).some(code => 
+            ) || Object.values(EU_COUNTRIES).some(code =>
                 code.toLowerCase() === normalizedCountry.toLowerCase()
             );
-            
+
             if (isEU) {
                 return 'eu';
             }
-            
+
             // Everything else is third country
             return 'third';
         }
-        
+
         function getAccountsByCountryType(countryType, businessType) {
             const accounts = {
                 receivables: '1200',  // Default
                 revenue: '7620',      // Default
                 vat: '26000'          // Default
             };
-            
+
             // Check for manual overrides first
             const overrides = getManualOverrides();
-            
+
             if (countryType === 'domestic') {
                 // Slovenia - domestic accounts
                 accounts.receivables = overrides.domesticReceivables || '1200';
                 accounts.vat = overrides.domesticVAT || '26000';
-                
+
                 if (overrides.domesticRevenue) {
                     accounts.revenue = overrides.domesticRevenue;
                 } else {
@@ -1706,7 +1749,7 @@
                 // EU countries
                 accounts.receivables = overrides.euReceivables || '1211';
                 accounts.vat = overrides.euVAT || '26071'; // OSS system
-                
+
                 if (overrides.euRevenue) {
                     accounts.revenue = overrides.euRevenue;
                 } else {
@@ -1731,7 +1774,7 @@
                 // Third countries
                 accounts.receivables = overrides.thirdReceivables || '1210';
                 accounts.vat = overrides.thirdVAT || ''; // No VAT by default for third countries
-                
+
                 if (overrides.thirdRevenue) {
                     accounts.revenue = overrides.thirdRevenue;
                 } else {
@@ -1753,10 +1796,10 @@
                     }
                 }
             }
-            
+
             return accounts;
         }
-        
+
         function getManualOverrides() {
             return {
                 domesticReceivables: document.getElementById('domesticReceivables').value.trim(),
@@ -1770,61 +1813,79 @@
                 thirdVAT: document.getElementById('thirdVAT').value.trim()
             };
         }
-        
+
         function updateAccountPreview() {
             const businessType = document.getElementById('businessType').value;
-            
+
             // Get accounts for each market type
             const domesticAccounts = getAccountsByCountryType('domestic', businessType);
             const euAccounts = getAccountsByCountryType('eu', businessType);
             const thirdAccounts = getAccountsByCountryType('third', businessType);
-            
+
             // Update preview displays
-            document.getElementById('domesticPreview').textContent = 
+            document.getElementById('domesticPreview').textContent =
                 `Receivables: ${domesticAccounts.receivables} | Revenue: ${domesticAccounts.revenue} | VAT: ${domesticAccounts.vat}`;
-            
-            document.getElementById('euPreview').textContent = 
+
+            document.getElementById('euPreview').textContent =
                 `Receivables: ${euAccounts.receivables} | Revenue: ${euAccounts.revenue} | VAT: ${euAccounts.vat} (OSS)`;
-            
-            document.getElementById('thirdPreview').textContent = 
+
+            document.getElementById('thirdPreview').textContent =
                 `Receivables: ${thirdAccounts.receivables} | Revenue: ${thirdAccounts.revenue} | VAT: ${thirdAccounts.vat || 'No VAT'}`;
         }
-        
+
         function formatDate(dateValue) {
             if (!dateValue) return new Date().toISOString().split('T')[0];
-            
+
             // Handle Excel date serial numbers
             if (typeof dateValue === 'number') {
                 // Excel epoch is December 30, 1899
                 const excelEpoch = new Date(1899, 11, 30);
                 const date = new Date(excelEpoch.getTime() + dateValue * 24 * 60 * 60 * 1000);
-                
+
                 // Get the date components to avoid timezone issues
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
-                
+
                 return `${year}-${month}-${day}`;
             }
-            
+
             // Handle string dates (like "4/1/25", "2025-04-01", etc.)
             if (typeof dateValue === 'string') {
                 let date;
-                
+
                 // Try to parse various date formats
                 if (dateValue.includes('/')) {
-                    // Handle formats like "4/1/25", "04/01/25", "4/1/2025"
+                    // Handle formats like "4/1/25", "04/01/25", "4/1/2025", "29/6/2025"
                     const parts = dateValue.split('/');
                     if (parts.length === 3) {
-                        let month = parseInt(parts[0]);
-                        let day = parseInt(parts[1]);
+                        let firstNum = parseInt(parts[0]);
+                        let secondNum = parseInt(parts[1]);
                         let year = parseInt(parts[2]);
-                        
+
                         // Handle 2-digit years (assume 2000s)
                         if (year < 100) {
                             year += 2000;
                         }
-                        
+
+                        // Detect format: if first number > 12, it must be DD/MM/YYYY
+                        // Otherwise, check if second number > 12 for MM/DD/YYYY
+                        let month, day;
+                        if (firstNum > 12) {
+                            // DD/MM/YYYY format
+                            day = firstNum;
+                            month = secondNum;
+                        } else if (secondNum > 12) {
+                            // MM/DD/YYYY format
+                            month = firstNum;
+                            day = secondNum;
+                        } else {
+                            // Ambiguous - default to European DD/MM/YYYY format
+                            // (since user is in Stockholm, Sweden)
+                            day = firstNum;
+                            month = secondNum;
+                        }
+
                         // Create date (month is 0-indexed in JavaScript)
                         date = new Date(year, month - 1, day);
                     }
@@ -1832,55 +1893,55 @@
                     // Try parsing as standard date string
                     date = new Date(dateValue);
                 }
-                
+
                 if (date && !isNaN(date.getTime())) {
                     // Get the date components to avoid timezone issues
                     const year = date.getFullYear();
                     const month = String(date.getMonth() + 1).padStart(2, '0');
                     const day = String(date.getDate()).padStart(2, '0');
-                    
+
                     return `${year}-${month}-${day}`;
                 }
             }
-            
+
             // Fallback to current date
             return new Date().toISOString().split('T')[0];
         }
-        
+
         function downloadXML() {
             try {
                 console.log('Download button clicked');
-                
+
                 if (!generatedXML || generatedXML.trim() === '') {
                     showMessage('No XML to download. Please generate XML first.', 'error');
                     return;
                 }
-                
+
                 console.log('XML length:', generatedXML.length);
-                
+
                 const timestamp = new Date().toISOString().split('T')[0];
                 const filename = `minimax_invoices_v2.17_${timestamp}.xml`;
-                
+
                 console.log('Attempting download with filename:', filename);
-                
+
                 // Method 1: Modern blob approach
                 try {
                     const blob = new Blob([generatedXML], { type: 'application/xml;charset=utf-8' });
                     console.log('Blob created successfully');
-                    
+
                     if (typeof URL !== 'undefined' && URL.createObjectURL) {
                         const url = URL.createObjectURL(blob);
                         console.log('Object URL created');
-                        
+
                         const a = document.createElement('a');
                         a.href = url;
                         a.download = filename;
                         a.style.display = 'none';
-                        
+
                         document.body.appendChild(a);
                         console.log('Triggering download');
                         a.click();
-                        
+
                         // Clean up
                         setTimeout(() => {
                             if (document.body.contains(a)) {
@@ -1889,14 +1950,14 @@
                             URL.revokeObjectURL(url);
                             console.log('Download cleanup completed');
                         }, 1000);
-                        
+
                         showMessage('🎉 XML file downloaded successfully!', 'success');
                         return;
                     }
                 } catch (blobError) {
                     console.error('Blob method failed:', blobError);
                 }
-                
+
                 // Method 2: Data URI fallback
                 console.log('Trying data URI fallback method');
                 const dataStr = 'data:application/xml;charset=utf-8,' + encodeURIComponent(generatedXML);
@@ -1904,38 +1965,38 @@
                 a.href = dataStr;
                 a.download = filename;
                 a.style.display = 'none';
-                
+
                 document.body.appendChild(a);
                 a.click();
-                
+
                 setTimeout(() => {
                     if (document.body.contains(a)) {
                         document.body.removeChild(a);
                     }
                 }, 100);
-                
+
                 showMessage('📁 XML file downloaded (data URI method)!', 'success');
-                
+
             } catch (error) {
                 console.error('Download failed:', error);
                 showMessage('Download failed: ' + error.message + '. Please try the copy method.', 'error');
-                
+
                 // Auto-try copy method as fallback
                 setTimeout(() => {
                     copyToClipboard();
                 }, 1000);
             }
         }
-        
+
         function copyToClipboard() {
             try {
                 if (!generatedXML || generatedXML.trim() === '') {
                     showMessage('No XML to copy. Please generate XML first.', 'error');
                     return;
                 }
-                
+
                 console.log('Attempting to copy XML to clipboard, length:', generatedXML.length);
-                
+
                 // Try modern clipboard API first
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(generatedXML).then(() => {
@@ -1949,7 +2010,7 @@
                     console.log('Clipboard API not available, using fallback');
                     fallbackCopyToClipboard();
                 }
-                
+
             } catch (error) {
                 console.error('Copy error:', error);
                 showMessage('Copy failed. Please use "Preview XML" to manually copy the content.', 'error');
@@ -1959,7 +2020,7 @@
                 }, 500);
             }
         }
-        
+
         function fallbackCopyToClipboard() {
             try {
                 // Create a temporary textarea
@@ -1971,10 +2032,10 @@
                 document.body.appendChild(textArea);
                 textArea.focus();
                 textArea.select();
-                
+
                 const successful = document.execCommand('copy');
                 document.body.removeChild(textArea);
-                
+
                 if (successful) {
                     showMessage('📋 XML copied to clipboard!', 'success');
                 } else {
@@ -1987,17 +2048,17 @@
                 togglePreview(); // Show preview for manual copy
             }
         }
-        
+
         function togglePreview() {
             const preview = document.getElementById('xmlPreview');
             const toggleBtn = document.getElementById('previewToggle');
-            
+
             if (preview.classList.contains('hidden')) {
                 if (!generatedXML || generatedXML.trim() === '') {
                     showMessage('No XML to preview. Please generate XML first.', 'error');
                     return;
                 }
-                
+
                 preview.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h3>📄 Generated XML Preview</h3>
@@ -2017,7 +2078,7 @@
                 toggleBtn.innerHTML = '<span>👁️</span> Preview XML';
             }
         }
-        
+
         function selectAllXML() {
             const xmlContent = document.getElementById('xmlContent');
             if (xmlContent) {
@@ -2027,7 +2088,7 @@
                 const selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(range);
-                
+
                 // Try to copy automatically
                 try {
                     document.execCommand('copy');
@@ -2037,7 +2098,7 @@
                 }
             }
         }
-        
+
         function showProcessing(message) {
             const messagesDiv = document.getElementById('messages');
             messagesDiv.innerHTML = `
@@ -2047,25 +2108,25 @@
                 </div>
             `;
         }
-        
+
         function hideProcessing() {
             const messagesDiv = document.getElementById('messages');
             if (messagesDiv.querySelector('.processing')) {
                 messagesDiv.innerHTML = '';
             }
         }
-        
+
         function showMessage(message, type) {
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `alert alert-${type}`;
-            
+
             const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
             messageDiv.innerHTML = `${icon} ${message}`;
-            
+
             messagesDiv.innerHTML = '';
             messagesDiv.appendChild(messageDiv);
-            
+
             // Auto-hide after 8 seconds
             setTimeout(() => {
                 if (messageDiv.parentNode) {
@@ -2073,13 +2134,13 @@
                 }
             }, 8000);
         }
-        
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-        
+
         function escapeXml(text) {
             if (text === null || text === undefined) return '';
             return String(text)
@@ -2091,4 +2152,5 @@
         }
     </script>
 </body>
+
 </html>
