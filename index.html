@@ -1860,8 +1860,9 @@
                     // Handle formats like "4/1/25", "04/01/25", "4/1/2025", "29/6/2025"
                     const parts = dateValue.split('/');
                     if (parts.length === 3) {
-                        let firstNum = parseInt(parts[0]);
-                        let secondNum = parseInt(parts[1]);
+                        // Default to DD/MM/YYYY format (European)
+                        let day = parseInt(parts[0]);
+                        let month = parseInt(parts[1]);
                         let year = parseInt(parts[2]);
 
                         // Handle 2-digit years (assume 2000s)
@@ -1869,23 +1870,16 @@
                             year += 2000;
                         }
 
-                        // Detect format: if first number > 12, it must be DD/MM/YYYY
-                        // Otherwise, check if second number > 12 for MM/DD/YYYY
-                        let month, day;
-                        if (firstNum > 12) {
-                            // DD/MM/YYYY format
-                            day = firstNum;
-                            month = secondNum;
-                        } else if (secondNum > 12) {
-                            // MM/DD/YYYY format
-                            month = firstNum;
-                            day = secondNum;
-                        } else {
-                            // Ambiguous - default to European DD/MM/YYYY format
-                            // (since user is in Stockholm, Sweden)
-                            day = firstNum;
-                            month = secondNum;
+                        // Only swap to MM/DD/YYYY if we detect that format
+                        // If day > 12, it can't be MM/DD format, so keep DD/MM
+                        // If month > 12, it must be MM/DD format, so swap
+                        if (month > 12 && day <= 12) {
+                            // Swap: it's MM/DD/YYYY format
+                            const temp = day;
+                            day = month;
+                            month = temp;
                         }
+                        // Otherwise keep DD/MM/YYYY (including ambiguous cases)
 
                         // Create date (month is 0-indexed in JavaScript)
                         date = new Date(year, month - 1, day);
