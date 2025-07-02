@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.17 - Third Country Credit Note DDV Section + Third Country Credit Note VAT +
-        Credit Notes Fix</title>
+    <title>Minimax Invoice XML Converter v2.19 - Date Format Selector + OSS VAT Fix + Third Country Credit Note Support
+    </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -391,10 +391,11 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.17</strong> | Last updated: <span id="updateTimestamp"></span> | <span
-                    style="color: #48bb78;">✓ Third Country Credit Note DDV</span> | <span style="color: #48bb78;">✓
-                    Credit Notes Fix</span> | <span style="color: #48bb78;">✓ DDV Book Support</span> | <span
-                    style="color: #48bb78;">✓ VAT Detection</span>
+                <strong>Version 2.19</strong> | Last updated: <span id="updateTimestamp"></span> | <span
+                    style="color: #48bb78;">✓ Date Format Selector</span> | <span style="color: #48bb78;">✓ OSS VAT
+                    Fix</span> | <span style="color: #48bb78;">✓ Third Country Credit Note DDV</span> | <span
+                    style="color: #48bb78;">✓ Credit Notes Fix</span> | <span style="color: #48bb78;">✓ DDV Book
+                    Support</span> | <span style="color: #48bb78;">✓ VAT Detection</span>
             </div>
         </div>
 
@@ -416,8 +417,13 @@
                 previous VAT errors by using the domestic VAT account (26000) for the correction entry.</p>
             <div
                 style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.17:</strong>
+                <strong style="color: #16a34a;">🆕 New in v2.19:</strong>
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
+                    <li><strong>Date Format Selector</strong> - Choose how dates are formatted in your Excel file
+                        (DD/MM/YYYY, MM/DD/YYYY, etc.)</li>
+                    <li><strong>OSS VAT Fix</strong> - OSS fields now correctly placed in VAT entry instead of revenue
+                        entry</li>
+                    <li><strong>Improved Date Auto-Detection</strong> - Better handling of ambiguous date formats</li>
                     <li><strong>Third Country Credit Note DDV Section</strong> - DDV book entries now included for third
                         country credit notes with VAT</li>
                     <li><strong>Third Country Credit Note VAT</strong> - VAT included on credit notes for non-EU
@@ -480,6 +486,20 @@
                         <option value="goods">Goods (Blago)</option>
                         <option value="materials">Materials (Material)</option>
                     </select>
+                </div>
+
+                <div class="setting-item">
+                    <label for="dateFormat">Excel Date Format</label>
+                    <select id="dateFormat">
+                        <option value="auto">Auto-detect (recommended)</option>
+                        <option value="dmy">DD/MM/YYYY - European (31/12/2025)</option>
+                        <option value="mdy">MM/DD/YYYY - American (12/31/2025)</option>
+                        <option value="ymd">YYYY-MM-DD - ISO (2025-12-31)</option>
+                    </select>
+                    <p style="font-size: 0.8rem; color: #718096; margin-top: 5px;">
+                        How dates are formatted in your Excel file. Auto-detect will try to determine the format
+                        automatically.
+                    </p>
                 </div>
 
                 <div class="setting-item">
@@ -673,8 +693,10 @@
 
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.17</strong> | Features: Third Country Credit Note DDV + Third Country
-                Credit Note VAT + Credit Notes Fix + DDV Book<br>
+                <strong>Minimax XML Converter v2.19</strong> | Features: Date Format Selector + OSS VAT Fix + Third
+                Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book<br>
+                <span style="color: #48bb78;">✓</span> Flexible date format selection |
+                <span style="color: #48bb78;">✓</span> OSS fields in correct VAT entry |
                 <span style="color: #48bb78;">✓</span> Third country credit note DDV sections |
                 <span style="color: #48bb78;">✓</span> Third country credit note VAT corrections |
                 <span style="color: #48bb78;">✓</span> Credit notes with proper negative amounts |
@@ -690,13 +712,13 @@
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.17 loaded');
-        console.log('Features: Third Country Credit Note DDV Section, Third Country Credit Note VAT, Credit Notes Fix (DDV Book & Journal), Automatic VAT Detection, Multi-Column VAT Support, DDV Book, Smart Account Selection');
-        console.log('Last updated: June 25, 2025');
+        console.log('Minimax XML Converter v2.19 loaded');
+        console.log('Features: Date Format Selector, OSS VAT Fix, Third Country Credit Note DDV Section, Third Country Credit Note VAT, Credit Notes Fix (DDV Book & Journal), Automatic VAT Detection, Multi-Column VAT Support, DDV Book, Smart Account Selection');
+        console.log('Last updated: July 2, 2025');
 
         // Fixed timestamp when code was generated
         function updateTimestamp() {
-            const timestamp = "June 25, 2025 at 2:00 PM";
+            const timestamp = "July 2, 2025 at 3:30 PM";
             const timestampElement = document.getElementById('updateTimestamp');
             if (timestampElement) {
                 timestampElement.textContent = timestamp;
@@ -768,7 +790,7 @@
         // Show version notification on load
         window.addEventListener('DOMContentLoaded', function () {
             updateTimestamp();
-            showMessage('✅ Minimax XML Converter v2.17 loaded - Third country credit note DDV section fix + Automatic VAT detection!', 'info');
+            showMessage('✅ Minimax XML Converter v2.19 loaded - Date format selector added + OSS VAT fix!', 'info');
 
             // Test hash function examples
             console.log('Hash function examples (same name always produces same code):');
@@ -1229,7 +1251,8 @@
                 customerCodeLogic: document.getElementById('customerCodeLogic').value || 'hash',
                 homeCountry: document.getElementById('homeCountry').value,
                 countryColumn: document.getElementById('countryColumn').value,
-                defaultVATRate: document.getElementById('defaultVATRate').value || 'S'
+                defaultVATRate: document.getElementById('defaultVATRate').value || 'S',
+                dateFormat: document.getElementById('dateFormat').value || 'auto'
             };
 
             // Function to generate unique customer code
@@ -1279,7 +1302,7 @@
             }
 
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            xml += '<!-- Generated by Minimax XML Converter v2.17 - Third Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book + VAT Detection + ISO Country Codes -->\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.19 - Date Format Selector + OSS VAT Fix + Third Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book + VAT Detection + ISO Country Codes -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
@@ -1411,7 +1434,7 @@
 
                 // Debug for first record
                 if (index === 0) {
-                    console.log('=== Minimax XML Converter v2.17 Debug Info ===');
+                    console.log('=== Minimax XML Converter v2.19 Debug Info ===');
                     console.log('Account selection for first record:');
                     console.log('Customer:', row['Name']);
                     console.log('Customer code:', customerCode || 'Not included');
@@ -1423,6 +1446,7 @@
                     console.log('Country code (ISO):', countryISO || 'None');
                     console.log('Country type:', countryType);
                     console.log('Document type:', isCreditNote ? 'Credit Note' : 'Invoice');
+                    console.log('Date format setting:', settings.dateFormat);
                     console.log('Selected accounts:');
                     console.log('  Receivables:', accounts.receivables);
                     console.log('  Revenue:', accounts.revenue);
@@ -1432,7 +1456,7 @@
                         console.log('Third country credit note VAT:', 'Will use domestic VAT account for correction');
                         console.log('Third country credit note DDV:', 'DDV section will be included');
                     }
-                    console.log('OSS journal entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will use ZnesekOsnoveVDenarniEnoti for revenue with DECIMAL VAT % (xx.xx format)' : 'Standard entry');
+                    console.log('OSS journal entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will be in VAT entry with DECIMAL VAT % (xx.xx format)' : 'Standard entry');
                     console.log('==========================================');
                 }
 
@@ -1441,7 +1465,7 @@
                 // GlavaTemeljnice section (required structure)
                 xml += '      <GlavaTemeljnice>\n';
                 xml += `        <SifraVrsteTemeljnice>${escapeXml(settings.invoiceType)}</SifraVrsteTemeljnice>\n`;
-                xml += `        <DatumTemeljnice>${formatDate(row['Date'])}</DatumTemeljnice>\n`;
+                xml += `        <DatumTemeljnice>${formatDate(row['Date'], settings.dateFormat)}</DatumTemeljnice>\n`;
                 xml += `        <OpisGlaveTemeljnice>${escapeXml(row['Number'] || documentPrefix + ' ' + (index + 1))}</OpisGlaveTemeljnice>\n`;
                 xml += '      </GlavaTemeljnice>\n';
 
@@ -1459,14 +1483,14 @@
                     xml += '      <DDV>\n';
                     xml += '        <DDVVrstica>\n';
                     xml += '          <DDVGlava>\n';
-                    xml += `            <DatumDDV>${formatDate(row['Date'])}</DatumDDV>\n`;
+                    xml += `            <DatumDDV>${formatDate(row['Date'], settings.dateFormat)}</DatumDDV>\n`;
                     xml += '            <KnjigaDDV>IR</KnjigaDDV>\n'; // IR = Knjiga izdanih računov
-                    xml += `            <DatumKnjizenjaDDV>${formatDate(row['Date'])}</DatumKnjizenjaDDV>\n`;
+                    xml += `            <DatumKnjizenjaDDV>${formatDate(row['Date'], settings.dateFormat)}</DatumKnjizenjaDDV>\n`;
                     if (customerCode) {
                         xml += `            <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
                     }
-                    xml += `            <Listina>${escapeXml(row['Number'] || 'IR:' + formatDate(row['Date']) + '-' + (index + 1))}</Listina>\n`;
-                    xml += `            <DatumListine>${formatDate(row['Date'])}</DatumListine>\n`;
+                    xml += `            <Listina>${escapeXml(row['Number'] || 'IR:' + formatDate(row['Date'], settings.dateFormat) + '-' + (index + 1))}</Listina>\n`;
+                    xml += `            <DatumListine>${formatDate(row['Date'], settings.dateFormat)}</DatumListine>\n`;
                     xml += '          </DDVGlava>\n';
                     xml += '          <DDVStopnje>\n';
                     xml += '            <DDVStopnja>\n';
@@ -1501,8 +1525,8 @@
                 // VrsticeTemeljnice section (correct structure from schema)
                 xml += '      <VrsticeTemeljnice>\n';
 
-                const invoiceDate = formatDate(row['Date']);
-                const dueDate = formatDate(row['Date due']); // Use the Date due column from Excel
+                const invoiceDate = formatDate(row['Date'], settings.dateFormat);
+                const dueDate = formatDate(row['Date due'], settings.dateFormat); // Use the Date due column from Excel
 
                 // Debug dates for first record
                 if (index === 0) {
@@ -1834,8 +1858,13 @@
                 `Receivables: ${thirdAccounts.receivables} | Revenue: ${thirdAccounts.revenue} | VAT: ${thirdAccounts.vat || 'No VAT'}`;
         }
 
-        function formatDate(dateValue) {
+        function formatDate(dateValue, dateFormat) {
             if (!dateValue) return new Date().toISOString().split('T')[0];
+
+            // Get the date format setting if not passed
+            if (!dateFormat) {
+                dateFormat = document.getElementById('dateFormat')?.value || 'auto';
+            }
 
             // Handle Excel date serial numbers
             if (typeof dateValue === 'number') {
@@ -1855,41 +1884,81 @@
             if (typeof dateValue === 'string') {
                 let date;
 
-                // Try to parse various date formats
+                // Handle dates with slashes (e.g., "7/1/25", "31/12/2025")
                 if (dateValue.includes('/')) {
                     const parts = dateValue.split('/');
                     if (parts.length === 3) {
                         let firstNum = parseInt(parts[0]);
                         let secondNum = parseInt(parts[1]);
-                        let year = parseInt(parts[2]);
+                        let thirdNum = parseInt(parts[2]);
 
-                        // Handle 2-digit years (assume 2000s)
+                        let day, month, year;
+
+                        // Determine the format
+                        if (dateFormat === 'dmy') {
+                            // DD/MM/YYYY format
+                            day = firstNum;
+                            month = secondNum;
+                            year = thirdNum;
+                        } else if (dateFormat === 'mdy') {
+                            // MM/DD/YYYY format
+                            month = firstNum;
+                            day = secondNum;
+                            year = thirdNum;
+                        } else if (dateFormat === 'ymd') {
+                            // YYYY/MM/DD format
+                            year = firstNum;
+                            month = secondNum;
+                            day = thirdNum;
+                        } else {
+                            // Auto-detect format
+                            if (firstNum > 1000) {
+                                // YYYY/MM/DD format
+                                year = firstNum;
+                                month = secondNum;
+                                day = thirdNum;
+                            } else if (firstNum > 12) {
+                                // DD/MM/YYYY format (day can't be > 31, but month can't be > 12)
+                                day = firstNum;
+                                month = secondNum;
+                                year = thirdNum;
+                            } else if (secondNum > 12) {
+                                // MM/DD/YYYY format
+                                month = firstNum;
+                                day = secondNum;
+                                year = thirdNum;
+                            } else {
+                                // Ambiguous - default to MM/DD/YYYY for compatibility
+                                month = firstNum;
+                                day = secondNum;
+                                year = thirdNum;
+                            }
+                        }
+
+                        // Handle 2-digit years
                         if (year < 100) {
                             year += 2000;
                         }
 
-                        // For single-digit format like "7/1/25", assume M/D/YY (American format)
-                        // This is because Excel often exports in this format
-                        let month, day;
-
-                        // Check if it's clearly DD/MM format (first number > 12)
-                        if (firstNum > 12) {
-                            // Must be DD/MM format
-                            day = firstNum;
-                            month = secondNum;
-                        } else if (secondNum > 12) {
-                            // Must be MM/DD format
-                            month = firstNum;
-                            day = secondNum;
-                        } else {
-                            // Ambiguous case - for "7/1/25" format, use MM/DD 
-                            // since that's what your Excel is using
-                            month = firstNum;
-                            day = secondNum;
-                        }
-
                         // Create date (month is 0-indexed in JavaScript)
                         date = new Date(year, month - 1, day);
+                    }
+                }
+                // Handle dates with dashes (e.g., "2025-12-31", "31-12-2025")
+                else if (dateValue.includes('-')) {
+                    const parts = dateValue.split('-');
+                    if (parts.length === 3) {
+                        let firstNum = parseInt(parts[0]);
+                        let secondNum = parseInt(parts[1]);
+                        let thirdNum = parseInt(parts[2]);
+
+                        // Check if it's ISO format (YYYY-MM-DD)
+                        if (firstNum > 1000) {
+                            date = new Date(firstNum, secondNum - 1, thirdNum);
+                        } else {
+                            // Assume DD-MM-YYYY
+                            date = new Date(thirdNum, secondNum - 1, firstNum);
+                        }
                     }
                 } else {
                     // Try parsing as standard date string
@@ -1922,7 +1991,7 @@
                 console.log('XML length:', generatedXML.length);
 
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = `minimax_invoices_v2.17_${timestamp}.xml`;
+                const filename = `minimax_invoices_v2.19_${timestamp}.xml`;
 
                 console.log('Attempting download with filename:', filename);
 
@@ -2069,7 +2138,7 @@
                         </button>
                     </div>
                     <div style="background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;">
-                        <strong>📁 Save as:</strong> minimax_invoices_v2.17_${new Date().toISOString().split('T')[0]}.xml
+                        <strong>📁 Save as:</strong> minimax_invoices_v2.19_${new Date().toISOString().split('T')[0]}.xml
                     </div>
                     <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(generatedXML)}</pre>
                 `;
