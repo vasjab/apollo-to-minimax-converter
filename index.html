@@ -1851,13 +1851,12 @@
                 return `${year}-${month}-${day}`;
             }
 
-            // Handle string dates (like "4/1/25", "2025-04-01", etc.)
+            // Handle string dates
             if (typeof dateValue === 'string') {
                 let date;
 
                 // Try to parse various date formats
                 if (dateValue.includes('/')) {
-                    // Handle formats like "1/7/2025" which should be DD/MM/YYYY
                     const parts = dateValue.split('/');
                     if (parts.length === 3) {
                         let firstNum = parseInt(parts[0]);
@@ -1869,19 +1868,25 @@
                             year += 2000;
                         }
 
-                        // DEFAULT TO DD/MM/YYYY FORMAT (European)
-                        let day = firstNum;    // parts[0] is day
-                        let month = secondNum;  // parts[1] is month
+                        // For single-digit format like "7/1/25", assume M/D/YY (American format)
+                        // This is because Excel often exports in this format
+                        let month, day;
 
-                        // Only interpret as MM/DD/YYYY if we have clear evidence:
-                        // - If firstNum > 12, it MUST be day (can't be month)
-                        // - If secondNum > 12, it MUST be day (so swap)
-                        if (secondNum > 12 && firstNum <= 12) {
-                            // This must be MM/DD/YYYY format
-                            day = secondNum;
+                        // Check if it's clearly DD/MM format (first number > 12)
+                        if (firstNum > 12) {
+                            // Must be DD/MM format
+                            day = firstNum;
+                            month = secondNum;
+                        } else if (secondNum > 12) {
+                            // Must be MM/DD format
                             month = firstNum;
+                            day = secondNum;
+                        } else {
+                            // Ambiguous case - for "7/1/25" format, use MM/DD 
+                            // since that's what your Excel is using
+                            month = firstNum;
+                            day = secondNum;
                         }
-                        // For all other cases (including ambiguous), keep DD/MM/YYYY
 
                         // Create date (month is 0-indexed in JavaScript)
                         date = new Date(year, month - 1, day);
