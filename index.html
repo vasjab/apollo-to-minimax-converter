@@ -1539,54 +1539,6 @@
                 const revenueAmount = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
                 xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${revenueAmount}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
 
-                // Add OSS fields for EU transactions with VAT
-                if (countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR') {
-                    xml += '          <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n'; // D = Da (Yes)
-
-                    // Use ISO country code - ensure we have it
-                    if (countryISO && countryISO.length === 2) {
-                        xml += `          <Drzava>${escapeXml(countryISO.toUpperCase())}</Drzava>\n`;
-                    } else {
-                        // Fallback - try to get code from country name
-                        const code = COUNTRY_CODES[customerCountry] || 'EU';
-                        xml += `          <Drzava>${escapeXml(code)}</Drzava>\n`;
-                    }
-
-                    // Calculate VAT percentage from amounts
-                    let vatPercent = netAmount !== 0 ? Math.abs((taxAmount / netAmount) * 100) : 0;
-
-                    // Try to get VAT rate from Excel headers first
-                    const dataVatRate = getVATRateFromData(row, columnHeaders);
-                    if (dataVatRate !== null) {
-                        vatPercent = dataVatRate;
-                        const source = row._vatRateFromHeader ? 'header above VAT amount' : 'data';
-                        console.log(`Row ${index + 1}: Using VAT rate from ${source}: ${vatPercent}%. Will output as decimal: ${vatPercent.toFixed(2)}`);
-                    } else {
-                        // Round to standard EU VAT rate
-                        const originalPercent = vatPercent;
-                        vatPercent = roundToStandardVATRate(vatPercent, countryISO);
-                        if (originalPercent !== vatPercent) {
-                            console.log(`Row ${index + 1}: Rounded VAT from ${originalPercent.toFixed(2)}% to ${vatPercent}% (standard rate for ${countryISO || 'EU'}). Will output as decimal: ${vatPercent.toFixed(2)}`);
-                        }
-                    }
-
-                    // Try integer format for Odstotek if decimal format fails
-                    // Uncomment the next line if Minimax rejects decimal format:
-                    // xml += `          <Odstotek>${Math.round(vatPercent)}</Odstotek>\n`;
-
-                    // Use decimal format (xx.00) as per schema
-                    xml += `          <Odstotek>${vatPercent.toFixed(2)}</Odstotek>\n`;
-
-                    // Set goods/services type - use capital first letter as per documentation
-                    const goodsServices = settings.businessType === 'services' ? 'Storitev' : 'Blago';
-                    xml += `          <BlagoStoritev>${goodsServices}</BlagoStoritev>\n`;
-                    xml += `          <DatumDDV>${invoiceDate}</DatumDDV>\n`;
-
-                    // IMPORTANT: For OSS entries, ALSO include the base amount field (in addition to the standard amount above)
-                    const osnoveAmount = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
-                    xml += `          <ZnesekOsnoveVDomaciDenarniEnoti>${osnoveAmount}</ZnesekOsnoveVDomaciDenarniEnoti>\n`;
-                }
-
                 xml += '        </VrsticaTemeljnice>\n';
 
                 // VAT entry if applicable (credit) - following exact schema sequence
@@ -1609,6 +1561,55 @@
                     // NOTE: For credit notes, keep negative values on credit side
                     const vatAmount = isCreditNote ? taxAmount.toFixed(2) : Math.abs(taxAmount).toFixed(2);
                     xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${vatAmount}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
+
+                    // Add OSS fields for EU transactions with VAT
+                    if (countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR') {
+                        xml += '          <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n'; // D = Da (Yes)
+
+                        // Use ISO country code - ensure we have it
+                        if (countryISO && countryISO.length === 2) {
+                            xml += `          <Drzava>${escapeXml(countryISO.toUpperCase())}</Drzava>\n`;
+                        } else {
+                            // Fallback - try to get code from country name
+                            const code = COUNTRY_CODES[customerCountry] || 'EU';
+                            xml += `          <Drzava>${escapeXml(code)}</Drzava>\n`;
+                        }
+
+                        // Calculate VAT percentage from amounts
+                        let vatPercent = netAmount !== 0 ? Math.abs((taxAmount / netAmount) * 100) : 0;
+
+                        // Try to get VAT rate from Excel headers first
+                        const dataVatRate = getVATRateFromData(row, columnHeaders);
+                        if (dataVatRate !== null) {
+                            vatPercent = dataVatRate;
+                            const source = row._vatRateFromHeader ? 'header above VAT amount' : 'data';
+                            console.log(`Row ${index + 1}: Using VAT rate from ${source}: ${vatPercent}%. Will output as decimal: ${vatPercent.toFixed(2)}`);
+                        } else {
+                            // Round to standard EU VAT rate
+                            const originalPercent = vatPercent;
+                            vatPercent = roundToStandardVATRate(vatPercent, countryISO);
+                            if (originalPercent !== vatPercent) {
+                                console.log(`Row ${index + 1}: Rounded VAT from ${originalPercent.toFixed(2)}% to ${vatPercent}% (standard rate for ${countryISO || 'EU'}). Will output as decimal: ${vatPercent.toFixed(2)}`);
+                            }
+                        }
+
+                        // Try integer format for Odstotek if decimal format fails
+                        // Uncomment the next line if Minimax rejects decimal format:
+                        // xml += `          <Odstotek>${Math.round(vatPercent)}</Odstotek>\n`;
+
+                        // Use decimal format (xx.00) as per schema
+                        xml += `          <Odstotek>${vatPercent.toFixed(2)}</Odstotek>\n`;
+
+                        // Set goods/services type - use capital first letter as per documentation
+                        const goodsServices = settings.businessType === 'services' ? 'Storitev' : 'Blago';
+                        xml += `          <BlagoStoritev>${goodsServices}</BlagoStoritev>\n`;
+                        xml += `          <DatumDDV>${invoiceDate}</DatumDDV>\n`;
+
+                        // IMPORTANT: For OSS entries, ALSO include the base amount field
+                        const osnoveAmount = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
+                        xml += `          <ZnesekOsnoveVDomaciDenarniEnoti>${osnoveAmount}</ZnesekOsnoveVDomaciDenarniEnoti>\n`;
+                    }
+
                     xml += '        </VrsticaTemeljnice>\n';
                 }
 
