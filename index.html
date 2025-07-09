@@ -1193,6 +1193,8 @@
                             const customerCountry = getCustomerCountry(row, settings.countryColumn);
                             const countryType = classifyCountry(customerCountry, settings.homeCountry);
 
+                            const isCreditNote = row['Type'] && row['Type'].toString().toLowerCase().includes('credit');
+
                             if (Math.abs(taxAmount) > 0.001 && (countryType !== 'third' || isCreditNote)) {
                                 vatInvoicesCount++;
                                 if (settings.invoiceType === 'IR') {
