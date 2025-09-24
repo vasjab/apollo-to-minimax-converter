@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.19 - Date Format Selector + OSS VAT Fix + Third Country Credit Note Support
-    </title>
+    <title>Minimax Invoice XML Converter v2.20 - OSS Structure Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -391,56 +390,25 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.19</strong> | Last updated: <span id="updateTimestamp"></span> | <span
-                    style="color: #48bb78;">✓ Date Format Selector</span> | <span style="color: #48bb78;">✓ OSS VAT
-                    Fix</span> | <span style="color: #48bb78;">✓ Third Country Credit Note DDV</span> | <span
-                    style="color: #48bb78;">✓ Credit Notes Fix</span> | <span style="color: #48bb78;">✓ DDV Book
-                    Support</span> | <span style="color: #48bb78;">✓ VAT Detection</span>
+                <strong>Version 2.20</strong> | Last updated: <span id="updateTimestamp"></span> | <span
+                    style="color: #48bb78;">✓ OSS Structure Fix</span> | <span style="color: #48bb78;">✓ No DDV for EU/OSS</span> | <span style="color: #48bb78;">✓ All Currency Fields</span>
             </div>
         </div>
 
         <div class="info-box">
-            <h3>✅ Smart Account Selection & Automatic VAT Detection</h3>
-            <p>This converter automatically selects the correct Slovenian accounting codes based on customer country and
-                business type. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper
-                invoice processing. It intelligently maps accounts for domestic (Slovenia), EU, and third-country
-                transactions.</p>
-            <p style="margin-top: 10px;"><strong>🎯 Automatic VAT Rate Detection:</strong> The converter automatically
-                detects VAT rates from your Excel column headers. If your VAT amount is in column AD with header "20%",
-                it will use 20% as the VAT rate. This works for any column and supports multiple VAT columns in the same
-                file.</p>
-            <p style="margin-top: 10px;"><strong>📊 Flexible Excel Format:</strong> Your Excel files can have VAT
-                amounts in different columns - the converter will automatically find them and extract the correct VAT
-                rates from the headers above each VAT column.</p>
-            <p style="margin-top: 10px;"><strong>🔧 Credit Note VAT Corrections:</strong> For credit notes issued to
-                third countries (non-EU), VAT is included if present in the Excel data. This allows you to correct
-                previous VAT errors by using the domestic VAT account (26000) for the correction entry.</p>
+            <h3>✅ OSS Structure Fixed - Proper EU Transaction Handling</h3>
+            <p>This converter now correctly handles OSS transactions according to Minimax requirements. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper invoice processing.</p>
+            <p style="margin-top: 10px;"><strong>🎯 Key Fix in v2.20:</strong> DDV section is now only included for domestic (Slovenian) transactions. EU transactions with OSS no longer have a DDV section, and all required OSS fields are properly placed in the VAT journal entry.</p>
             <div
                 style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 New in v2.19:</strong>
+                <strong style="color: #16a34a;">🆕 Changes in v2.20:</strong>
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                    <li><strong>Date Format Selector</strong> - Choose how dates are formatted in your Excel file
-                        (DD/MM/YYYY, MM/DD/YYYY, etc.)</li>
-                    <li><strong>OSS VAT Fix</strong> - OSS fields now correctly placed in VAT entry instead of revenue
-                        entry</li>
-                    <li><strong>Improved Date Auto-Detection</strong> - Better handling of ambiguous date formats</li>
-                    <li><strong>Third Country Credit Note DDV Section</strong> - DDV book entries now included for third
-                        country credit notes with VAT</li>
-                    <li><strong>Third Country Credit Note VAT</strong> - VAT included on credit notes for non-EU
-                        countries to correct previous errors</li>
-                    <li><strong>Credit Notes Fix (DDV Book)</strong> - Negative amounts now shown correctly in DDV book
-                        for credit notes</li>
-                    <li><strong>Credit Notes Fix (Journal)</strong> - Proper handling of negative amounts in revenue and
-                        VAT entries</li>
-                    <li><strong>Automatic VAT Detection from Excel Headers</strong> - No manual configuration needed!
-                    </li>
-                    <li><strong>Multi-Column VAT Support</strong> - Handles Excel files with multiple VAT columns
-                        automatically</li>
-                    <li><strong>Smart Column Matching</strong> - Matches VAT amounts to their respective column headers
-                        for accurate rates</li>
-                    <li><strong>Flexible Format Support</strong> - Works with headers like "20%", "VAT 21%", "Tax 19%",
-                        etc.</li>
-                    <li>All previous features: Decimal VAT rates, OSS support, DDV book, ISO country codes</li>
+                    <li><strong>OSS Structure Fix</strong> - DDV section removed for EU transactions</li>
+                    <li><strong>PredlozitevObracunaOSS</strong> - Added to all journal entries (N/D as appropriate)</li>
+                    <li><strong>EU VAT Account</strong> - Changed default from 26071 to 26002</li>
+                    <li><strong>Currency Fields</strong> - Added both foreign and domestic currency amounts</li>
+                    <li><strong>Additional OSS Field</strong> - Added ZnesekOsnoveVDenarniEnoti for OSS entries</li>
+                    <li>All v2.19 features retained: VAT detection, date formats, customer handling, etc.</li>
                 </ul>
             </div>
         </div>
@@ -572,24 +540,9 @@
                 style="margin-top: 20px; padding: 15px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px;">
                 <h3 style="color: #92400e; margin-bottom: 10px;">⚠️ Important: Customer Import</h3>
                 <p style="color: #92400e; font-size: 0.9rem; line-height: 1.6;">
-                    <strong>Tip:</strong> Use "Hash of Name" method to prevent duplicate customer codes. The same
-                    customer name will always generate the same code, so importing the same customer multiple times
-                    won't create duplicates in Minimax.
+                    <strong>Tip:</strong> If you get "customer already exists" errors, set "Include Customer Data" to "No" for subsequent imports. The same
+                    customer name will always generate the same code with the hash method.
                 </p>
-                <p style="color: #92400e; font-size: 0.85rem; margin-top: 10px;">
-                    Customer code generation options:
-                </p>
-                <ul style="margin: 8px 0 0 20px; font-size: 0.85rem; color: #92400e;">
-                    <li><strong>Hash of Name:</strong> Creates unique 6-8 char code from name (same name = same
-                        code)<br>
-                        <span style="font-size: 0.8rem; color: #666;">Example: The same customer name will always
-                            generate the same code</span>
-                    </li>
-                    <li><strong>Tax Number:</strong> Uses customer's tax ID (good for uniqueness)</li>
-                    <li><strong>Name-based:</strong> Creates code from customer name</li>
-                    <li><strong>Timestamp:</strong> Adds unique timestamp to prevent duplicates</li>
-                    <li><strong>Manual:</strong> Uses your prefix + sequential numbers (may cause duplicates)</li>
-                </ul>
             </div>
 
             <div class="info-box" style="margin-top: 20px;">
@@ -598,19 +551,19 @@
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px;">
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #48bb78;">
                         <strong>🇸🇮 Slovenia (Domestic)</strong><br>
-                        <small id="domesticPreview">Receivables: 1200 | Revenue: 7620 | VAT: 26000</small>
+                        <small id="domesticPreview">Receivables: 1200 | Revenue: 7620 | VAT: 26000 | DDV: YES</small>
                     </div>
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #4299e1;">
                         <strong>🇪🇺 EU Countries</strong><br>
-                        <small id="euPreview">Receivables: 1211 | Revenue: 76301 | VAT: 26071 (OSS)</small>
+                        <small id="euPreview">Receivables: 1211 | Revenue: 76301 | VAT: 26002 (OSS) | DDV: NO</small>
                     </div>
                     <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #ed8936;">
                         <strong>🌍 Third Countries</strong><br>
-                        <small id="thirdPreview">Receivables: 1210 | Revenue: 76302 | VAT: No VAT</small>
+                        <small id="thirdPreview">Receivables: 1210 | Revenue: 76302 | VAT: No VAT | DDV: NO</small>
                     </div>
                 </div>
                 <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;">Revenue accounts automatically selected
-                    based on business type and customer country. You can override these below.</p>
+                    based on business type and customer country. DDV book entries only for domestic transactions.</p>
             </div>
 
             <div style="margin-top: 20px;">
@@ -638,8 +591,8 @@
                         <input type="text" id="euRevenue" placeholder="Auto: Based on business type">
                     </div>
                     <div class="setting-item">
-                        <label>🇪🇺 EU VAT</label>
-                        <input type="text" id="euVAT" placeholder="Auto: 26071 (OSS)">
+                        <label>🇪🇺 EU VAT (OSS)</label>
+                        <input type="text" id="euVAT" placeholder="Auto: 26002">
                     </div>
 
                     <div class="setting-item">
@@ -693,32 +646,28 @@
 
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.19</strong> | Features: Date Format Selector + OSS VAT Fix + Third
-                Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book<br>
-                <span style="color: #48bb78;">✓</span> Flexible date format selection |
-                <span style="color: #48bb78;">✓</span> OSS fields in correct VAT entry |
-                <span style="color: #48bb78;">✓</span> Third country credit note DDV sections |
-                <span style="color: #48bb78;">✓</span> Third country credit note VAT corrections |
-                <span style="color: #48bb78;">✓</span> Credit notes with proper negative amounts |
-                <span style="color: #48bb78;">✓</span> Automatic VAT detection from any Excel column |
-                <span style="color: #48bb78;">✓</span> Multi-column VAT support |
-                <span style="color: #48bb78;">✓</span> DDV/VAT book entries |
+                <strong>Minimax XML Converter v2.20</strong> | Features: OSS Structure Fix + All v2.19 Features<br>
+                <span style="color: #48bb78;">✓</span> DDV only for domestic |
+                <span style="color: #48bb78;">✓</span> OSS fields in VAT entry |
+                <span style="color: #48bb78;">✓</span> EU VAT account 26002 |
+                <span style="color: #48bb78;">✓</span> All currency fields |
+                <span style="color: #48bb78;">✓</span> VAT auto-detection |
+                <span style="color: #48bb78;">✓</span> Date format selector |
                 <span style="color: #48bb78;">✓</span> Smart country detection |
-                <span style="color: #48bb78;">✓</span> Duplicate prevention |
-                <span style="color: #48bb78;">✓</span> ISO country codes
+                <span style="color: #48bb78;">✓</span> Duplicate prevention
             </p>
         </div>
     </div>
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.19 loaded');
-        console.log('Features: Date Format Selector, OSS VAT Fix, Third Country Credit Note DDV Section, Third Country Credit Note VAT, Credit Notes Fix (DDV Book & Journal), Automatic VAT Detection, Multi-Column VAT Support, DDV Book, Smart Account Selection');
-        console.log('Last updated: July 2, 2025');
+        console.log('Minimax XML Converter v2.20 loaded');
+        console.log('Features: OSS Structure Fix - DDV only for domestic, proper OSS fields placement');
+        console.log('Last updated: December 19, 2024');
 
         // Fixed timestamp when code was generated
         function updateTimestamp() {
-            const timestamp = "July 2, 2025 at 3:30 PM";
+            const timestamp = "December 19, 2024 at 3:45 PM";
             const timestampElement = document.getElementById('updateTimestamp');
             if (timestampElement) {
                 timestampElement.textContent = timestamp;
@@ -790,16 +739,7 @@
         // Show version notification on load
         window.addEventListener('DOMContentLoaded', function () {
             updateTimestamp();
-            showMessage('✅ Minimax XML Converter v2.19 loaded - Date format selector added + OSS VAT fix!', 'info');
-
-            // Test hash function examples
-            console.log('Hash function examples (same name always produces same code):');
-            console.log('  "ACME Corp" → "' + simpleHash('ACME Corp'.toUpperCase()) + '"');
-            console.log('  "John Smith Ltd" → "' + simpleHash('John Smith Ltd'.toUpperCase()) + '"');
-            console.log('  "Test Company" → "' + simpleHash('Test Company'.toUpperCase()) + '"');
-            console.log('  "ABC Inc" → "' + simpleHash('ABC Inc'.toUpperCase()) + '"');
-            console.log('  "XYZ Solutions" → "' + simpleHash('XYZ Solutions'.toUpperCase()) + '"');
-            console.log('Note: Importing the same customer multiple times will use the same code.');
+            showMessage('✅ Minimax XML Converter v2.20 loaded - OSS structure fixed!', 'info');
         });
 
         let invoiceData = [];
@@ -1195,13 +1135,12 @@
 
                             const isCreditNote = row['Type'] && row['Type'].toString().toLowerCase().includes('credit');
 
-                            if (Math.abs(taxAmount) > 0.001 && (countryType !== 'third' || isCreditNote)) {
-                                vatInvoicesCount++;
-                                if (settings.invoiceType === 'IR') {
+                            if (Math.abs(taxAmount) > 0.001) {
+                                if (countryType === 'domestic' && settings.invoiceType === 'IR') {
                                     ddvCount++;
-                                    if (countryType === 'eu') {
-                                        ossCount++;
-                                    }
+                                }
+                                if (countryType === 'eu') {
+                                    ossCount++;
                                 }
                             }
                         });
@@ -1218,13 +1157,11 @@
                             message += ` (customers not included)`;
                         }
 
-                        if (settings.invoiceType === 'IR' && ddvCount > 0) {
-                            message += ` and ${ddvCount} DDV book entries`;
+                        if (settings.invoiceType === 'IR') {
+                            message += ` | DDV entries: ${ddvCount} domestic`;
                             if (ossCount > 0) {
-                                message += ` (${ossCount} with OSS)`;
+                                message += ` | OSS entries: ${ossCount} EU`;
                             }
-                        } else if (settings.invoiceType !== 'IR' && vatInvoicesCount > 0) {
-                            message += ` (Note: DDV segments only included for IR type)`;
                         }
                         message += ` (${(generatedXML.length / 1024).toFixed(1)} KB)`;
 
@@ -1304,7 +1241,7 @@
             }
 
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            xml += '<!-- Generated by Minimax XML Converter v2.19 - Date Format Selector + OSS VAT Fix + Third Country Credit Note DDV + Third Country Credit Note VAT + Credit Notes Fix + DDV Book + VAT Detection + ISO Country Codes -->\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.20 - OSS Structure Fix -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
@@ -1318,21 +1255,12 @@
                     const customerName = row['Name'];
                     if (customerName && !customerMap.has(customerName)) {
                         const country = getCustomerCountry(row, settings.countryColumn);
-                        // If the City is in Iceland (e.g., Kopavogur), set country to Iceland
-                        let finalCountry = country;
-                        if (!country && row['City']) {
-                            const city = row['City'].toLowerCase();
-                            if (city.includes('kopavogur') || city.includes('kópavogur') ||
-                                city.includes('reykjavik') || city.includes('akureyri')) {
-                                finalCountry = 'Iceland';
-                            }
-                        }
                         const customer = {
                             name: customerName,
                             address: row['Address'] || '',
                             postalCode: row['Postal code'] || '',
                             city: row['City'] || '',
-                            country: finalCountry,
+                            country: country,
                             taxNumber: row['Tax number'] || ''
                         };
 
@@ -1405,15 +1333,6 @@
                 // Get customer country and determine accounts
                 let customerCountry = getCustomerCountry(row, settings.countryColumn);
 
-                // Special handling for Iceland cities
-                if (!customerCountry && row['City']) {
-                    const city = row['City'].toLowerCase();
-                    if (city.includes('kopavogur') || city.includes('kópavogur') ||
-                        city.includes('reykjavik') || city.includes('akureyri')) {
-                        customerCountry = 'Iceland';
-                    }
-                }
-
                 let countryType = classifyCountry(customerCountry, settings.homeCountry);
 
                 // Special handling: if no VAT and no country detected, assume third country
@@ -1436,29 +1355,20 @@
 
                 // Debug for first record
                 if (index === 0) {
-                    console.log('=== Minimax XML Converter v2.19 Debug Info ===');
+                    console.log('=== Minimax XML Converter v2.20 Debug Info ===');
                     console.log('Account selection for first record:');
                     console.log('Customer:', row['Name']);
                     console.log('Customer code:', customerCode || 'Not included');
-                    console.log('Customer code logic:', settings.customerCodeLogic);
-                    if (settings.customerCodeLogic === 'hash' && row['Name']) {
-                        console.log('Hash code generated:', simpleHash(row['Name'].trim().toUpperCase()));
-                    }
                     console.log('Customer country:', customerCountry);
                     console.log('Country code (ISO):', countryISO || 'None');
                     console.log('Country type:', countryType);
                     console.log('Document type:', isCreditNote ? 'Credit Note' : 'Invoice');
-                    console.log('Date format setting:', settings.dateFormat);
                     console.log('Selected accounts:');
                     console.log('  Receivables:', accounts.receivables);
                     console.log('  Revenue:', accounts.revenue);
                     console.log('  VAT:', accounts.vat || 'No VAT');
-                    console.log('DDV segment:', Math.abs(taxAmount) > 0.001 && (accounts.vat || (isCreditNote && countryType === 'third')) && (countryType !== 'third' || isCreditNote) && settings.invoiceType === 'IR' ? 'Will be included' : 'Not included');
-                    if (isCreditNote && countryType === 'third' && Math.abs(taxAmount) > 0.001) {
-                        console.log('Third country credit note VAT:', 'Will use domestic VAT account for correction');
-                        console.log('Third country credit note DDV:', 'DDV section will be included');
-                    }
-                    console.log('OSS journal entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will be in VAT entry with DECIMAL VAT % (xx.xx format)' : 'Standard entry');
+                    console.log('DDV segment:', countryType === 'domestic' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will be included' : 'NOT included (EU/Third)');
+                    console.log('OSS entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 ? 'YES - in VAT entry' : 'No');
                     console.log('==========================================');
                 }
 
@@ -1471,17 +1381,9 @@
                 xml += `        <OpisGlaveTemeljnice>${escapeXml(row['Number'] || documentPrefix + ' ' + (index + 1))}</OpisGlaveTemeljnice>\n`;
                 xml += '      </GlavaTemeljnice>\n';
 
-                // DDV section for VAT book entries (only for invoices with VAT)
-                // This section must be included for the DDV book to appear in Minimax
-                // For credit notes, include DDV even for third countries if VAT exists (to correct errors)
-                if (Math.abs(taxAmount) > 0.001 && (accounts.vat || (isCreditNote && countryType === 'third')) && (countryType !== 'third' || isCreditNote) && settings.invoiceType === 'IR') {
-                    // For third country credit notes with VAT, ensure we have a VAT account
-                    let ddvVatAccount = accounts.vat;
-                    if (!ddvVatAccount && isCreditNote && countryType === 'third') {
-                        const overrides = getManualOverrides();
-                        ddvVatAccount = overrides.domesticVAT || '26000'; // Use domestic VAT for corrections
-                    }
-
+                // DDV section - ONLY for DOMESTIC transactions with VAT
+                // NO DDV section for EU or third countries
+                if (countryType === 'domestic' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR') {
                     xml += '      <DDV>\n';
                     xml += '        <DDVVrstica>\n';
                     xml += '          <DDVGlava>\n';
@@ -1499,9 +1401,6 @@
 
                     // Determine VAT rate code for DDV section
                     let vatRateCode = settings.defaultVATRate;
-
-                    // The actual percentage will be determined from Excel headers
-                    // This is just for the DDV book entry type classification
 
                     xml += `              <SifraStopnjeDDV>${vatRateCode}</SifraStopnjeDDV>\n`;
 
@@ -1524,72 +1423,63 @@
                     xml += '      </DDV>\n';
                 }
 
-                // VrsticeTemeljnice section (correct structure from schema)
+                // VrsticeTemeljnice section (journal entries)
                 xml += '      <VrsticeTemeljnice>\n';
 
                 const invoiceDate = formatDate(row['Date'], settings.dateFormat);
                 const dueDate = formatDate(row['Date due'], settings.dateFormat); // Use the Date due column from Excel
 
-                // Debug dates for first record
-                if (index === 0) {
-                    console.log('First record dates:');
-                    console.log('Raw invoice date from Excel:', row['Date'], '(Type:', typeof row['Date'], ')');
-                    console.log('Raw due date from Excel:', row['Date due'], '(Type:', typeof row['Date due'], ')');
-                    console.log('Formatted invoice date:', invoiceDate);
-                    console.log('Formatted due date:', dueDate);
-                }
-
-                // Receivables entry (debit) - following exact schema sequence
+                // Receivables entry (debit) - with all currency fields
                 xml += '        <VrsticaTemeljnice>\n';
+                xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
                 xml += `          <OpisVrsticeTemeljnice>${documentPrefix} ${escapeXml(row['Number'] || '')} - ${escapeXml(row['Name'] || '')}</OpisVrsticeTemeljnice>\n`;
                 xml += `          <SifraKonta>${escapeXml(accounts.receivables)}</SifraKonta>\n`;
                 if (customerCode) {
                     xml += `          <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
                 }
-                // Add required dates for account 1200/1210/1211
+                // Add required dates for receivables
                 xml += `          <DatumZapadlosti>${dueDate}</DatumZapadlosti>\n`;
                 xml += `          <DatumOpravljanja>${invoiceDate}</DatumOpravljanja>\n`;
                 if (row['Reference']) {
                     xml += `          <VezaZaPlacilo>${escapeXml(row['Reference'])}</VezaZaPlacilo>\n`;
                 }
+                xml += '          <SifraDenarneEnote>EUR</SifraDenarneEnote>\n';
+                xml += `          <ZnesekVBremeVDenarniEnoti>${grossAmount.toFixed(2)}</ZnesekVBremeVDenarniEnoti>\n`;
+                xml += '          <ZnesekVDobroVDenarniEnoti>0.00</ZnesekVDobroVDenarniEnoti>\n';
                 xml += `          <ZnesekVBremeVDomaciDenarniEnoti>${grossAmount.toFixed(2)}</ZnesekVBremeVDomaciDenarniEnoti>\n`;
+                xml += '          <ZnesekVDobroVDomaciDenarniEnoti>0.00</ZnesekVDobroVDomaciDenarniEnoti>\n';
+                xml += '          <PredlozitevObracunaOSS>N</PredlozitevObracunaOSS>\n';
                 xml += '        </VrsticaTemeljnice>\n';
 
-                // Revenue entry (credit) - following exact schema sequence
+                // Revenue entry (credit) - with all currency fields
                 xml += '        <VrsticaTemeljnice>\n';
+                xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
                 xml += `          <OpisVrsticeTemeljnice>Revenue - ${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
                 xml += `          <SifraKonta>${escapeXml(accounts.revenue)}</SifraKonta>\n`;
-                xml += `          <DatumOpravljanja>${invoiceDate}</DatumOpravljanja>\n`;
-
-                // IMPORTANT: For credit notes, keep negative values on credit side
+                xml += '          <SifraDenarneEnote>EUR</SifraDenarneEnote>\n';
+                xml += '          <ZnesekVBremeVDenarniEnoti>0.00</ZnesekVBremeVDenarniEnoti>\n';
                 const revenueAmount = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
+                xml += `          <ZnesekVDobroVDenarniEnoti>${revenueAmount}</ZnesekVDobroVDenarniEnoti>\n`;
+                xml += '          <ZnesekVBremeVDomaciDenarniEnoti>0.00</ZnesekVBremeVDomaciDenarniEnoti>\n';
                 xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${revenueAmount}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
-
+                xml += '          <PredlozitevObracunaOSS>N</PredlozitevObracunaOSS>\n';
                 xml += '        </VrsticaTemeljnice>\n';
 
-                // VAT entry if applicable (credit) - following exact schema sequence
-                // For credit notes, taxAmount will be negative if there's VAT
-                // For credit notes to third countries, include VAT if present (to correct previous errors)
-                if (Math.abs(taxAmount) > 0.001 && (accounts.vat || (isCreditNote && countryType === 'third'))) {
-                    // For third country credit notes with VAT, use domestic VAT account as fallback
-                    let vatAccount = accounts.vat;
-                    if (!vatAccount && isCreditNote && countryType === 'third') {
-                        const overrides = getManualOverrides();
-                        vatAccount = overrides.domesticVAT || '26000'; // Use domestic VAT for corrections
-                        console.log(`Credit note ${row['Number']}: Using domestic VAT account ${vatAccount} for third country VAT correction`);
-                    }
-
+                // VAT entry if applicable (credit) - with all currency fields and OSS fields for EU
+                if (Math.abs(taxAmount) > 0.001 && accounts.vat) {
                     xml += '        <VrsticaTemeljnice>\n';
+                    xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
                     xml += `          <OpisVrsticeTemeljnice>VAT - ${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
-                    xml += `          <SifraKonta>${escapeXml(vatAccount)}</SifraKonta>\n`;
-                    xml += `          <DatumOpravljanja>${invoiceDate}</DatumOpravljanja>\n`;
-
-                    // NOTE: For credit notes, keep negative values on credit side
+                    xml += `          <SifraKonta>${escapeXml(accounts.vat)}</SifraKonta>\n`;
+                    xml += '          <SifraDenarneEnote>EUR</SifraDenarneEnote>\n';
+                    xml += '          <ZnesekVBremeVDenarniEnoti>0.00</ZnesekVBremeVDenarniEnoti>\n';
                     const vatAmount = isCreditNote ? taxAmount.toFixed(2) : Math.abs(taxAmount).toFixed(2);
+                    xml += `          <ZnesekVDobroVDenarniEnoti>${vatAmount}</ZnesekVDobroVDenarniEnoti>\n`;
+                    xml += '          <ZnesekVBremeVDomaciDenarniEnoti>0.00</ZnesekVBremeVDomaciDenarniEnoti>\n';
                     xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${vatAmount}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
 
                     // Add OSS fields for EU transactions with VAT
-                    if (countryType === 'eu' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR') {
+                    if (countryType === 'eu' && settings.invoiceType === 'IR') {
                         xml += '          <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n'; // D = Da (Yes)
 
                         // Use ISO country code - ensure we have it
@@ -1619,10 +1509,6 @@
                             }
                         }
 
-                        // Try integer format for Odstotek if decimal format fails
-                        // Uncomment the next line if Minimax rejects decimal format:
-                        // xml += `          <Odstotek>${Math.round(vatPercent)}</Odstotek>\n`;
-
                         // Use decimal format (xx.00) as per schema
                         xml += `          <Odstotek>${vatPercent.toFixed(2)}</Odstotek>\n`;
 
@@ -1631,9 +1517,13 @@
                         xml += `          <BlagoStoritev>${goodsServices}</BlagoStoritev>\n`;
                         xml += `          <DatumDDV>${invoiceDate}</DatumDDV>\n`;
 
-                        // IMPORTANT: For OSS entries, ALSO include the base amount field
+                        // Include both base amount fields for OSS
                         const osnoveAmount = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
                         xml += `          <ZnesekOsnoveVDomaciDenarniEnoti>${osnoveAmount}</ZnesekOsnoveVDomaciDenarniEnoti>\n`;
+                        xml += `          <ZnesekOsnoveVDenarniEnoti>${osnoveAmount}</ZnesekOsnoveVDenarniEnoti>\n`;
+                    } else {
+                        // Not OSS - set flag to N
+                        xml += '          <PredlozitevObracunaOSS>N</PredlozitevObracunaOSS>\n';
                     }
 
                     xml += '        </VrsticaTemeljnice>\n';
@@ -1669,10 +1559,7 @@
             'South Korea': 'KR', 'China': 'CN', 'India': 'IN', 'Brazil': 'BR',
             'Mexico': 'MX', 'Turkey': 'TR', 'Russia': 'RU', 'Ukraine': 'UA',
             'Serbia': 'RS', 'Bosnia and Herzegovina': 'BA', 'North Macedonia': 'MK',
-            'Montenegro': 'ME', 'Albania': 'AL', 'Moldova': 'MD', 'Belarus': 'BY',
-            'Kopavogur': 'IS', 'Kópavogur': 'IS', // Common Iceland location
-            'Den Haag': 'NL', 'The Hague': 'NL', // Netherlands variations
-            'Kessel': 'BE', 'Pécs': 'HU', 'Salurn': 'IT' // Common city mappings
+            'Montenegro': 'ME', 'Albania': 'AL', 'Moldova': 'MD', 'Belarus': 'BY'
         };
 
         function getCustomerCountry(row, countryColumnSetting) {
@@ -1684,22 +1571,6 @@
                 country = row['Shipping Country'] || row['Billing Country'] || row['Country'] || '';
             } else {
                 country = row[countryColumnSetting] || '';
-            }
-
-            // If no country found, try to detect from other fields
-            if (!country) {
-                // Check if country is mentioned in city or address fields
-                const city = row['City'] || '';
-                const address = row['Address'] || '';
-
-                // Check common patterns in city field
-                for (const [countryName, code] of Object.entries(COUNTRY_CODES)) {
-                    if (city.toLowerCase().includes(countryName.toLowerCase()) ||
-                        address.toLowerCase().includes(countryName.toLowerCase())) {
-                        country = countryName;
-                        break;
-                    }
-                }
             }
 
             return country;
@@ -1775,7 +1646,7 @@
             } else if (countryType === 'eu') {
                 // EU countries
                 accounts.receivables = overrides.euReceivables || '1211';
-                accounts.vat = overrides.euVAT || '26071'; // OSS system
+                accounts.vat = overrides.euVAT || '26002'; // Changed from 26071 to 26002 for OSS
 
                 if (overrides.euRevenue) {
                     accounts.revenue = overrides.euRevenue;
@@ -1851,13 +1722,13 @@
 
             // Update preview displays
             document.getElementById('domesticPreview').textContent =
-                `Receivables: ${domesticAccounts.receivables} | Revenue: ${domesticAccounts.revenue} | VAT: ${domesticAccounts.vat}`;
+                `Receivables: ${domesticAccounts.receivables} | Revenue: ${domesticAccounts.revenue} | VAT: ${domesticAccounts.vat} | DDV: YES`;
 
             document.getElementById('euPreview').textContent =
-                `Receivables: ${euAccounts.receivables} | Revenue: ${euAccounts.revenue} | VAT: ${euAccounts.vat} (OSS)`;
+                `Receivables: ${euAccounts.receivables} | Revenue: ${euAccounts.revenue} | VAT: ${euAccounts.vat} (OSS) | DDV: NO`;
 
             document.getElementById('thirdPreview').textContent =
-                `Receivables: ${thirdAccounts.receivables} | Revenue: ${thirdAccounts.revenue} | VAT: ${thirdAccounts.vat || 'No VAT'}`;
+                `Receivables: ${thirdAccounts.receivables} | Revenue: ${thirdAccounts.revenue} | VAT: ${thirdAccounts.vat || 'No VAT'} | DDV: NO`;
         }
 
         function formatDate(dateValue, dateFormat) {
@@ -1993,7 +1864,7 @@
                 console.log('XML length:', generatedXML.length);
 
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = `minimax_invoices_v2.19_${timestamp}.xml`;
+                const filename = `minimax_invoices_v2.20_${timestamp}.xml`;
 
                 console.log('Attempting download with filename:', filename);
 
@@ -2140,7 +2011,7 @@
                         </button>
                     </div>
                     <div style="background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;">
-                        <strong>📁 Save as:</strong> minimax_invoices_v2.19_${new Date().toISOString().split('T')[0]}.xml
+                        <strong>📁 Save as:</strong> minimax_invoices_v2.20_${new Date().toISOString().split('T')[0]}.xml
                     </div>
                     <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(generatedXML)}</pre>
                 `;
