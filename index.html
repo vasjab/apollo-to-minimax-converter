@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimax Invoice XML Converter v2.20 - OSS Structure Fix</title>
+    <title>Minimax Invoice XML Converter v2.21 - With Clearing Entries</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -390,25 +390,22 @@
             <h1>🏢 Minimax XML Converter</h1>
             <p>Convert your invoice export to Minimax-compatible XML format</p>
             <div style="margin-top: 10px; font-size: 0.85rem; color: #718096;">
-                <strong>Version 2.20</strong> | Last updated: <span id="updateTimestamp"></span> | <span
-                    style="color: #48bb78;">✓ OSS Structure Fix</span> | <span style="color: #48bb78;">✓ No DDV for EU/OSS</span> | <span style="color: #48bb78;">✓ All Currency Fields</span>
+                <strong>Version 2.21</strong> | Last updated: <span id="updateTimestamp"></span> | <span
+                    style="color: #48bb78;">✓ Clearing Entries Added</span> | <span style="color: #48bb78;">✓ OSS Structure Fix</span> | <span style="color: #48bb78;">✓ No DDV for EU/OSS</span>
             </div>
         </div>
 
         <div class="info-box">
-            <h3>✅ OSS Structure Fixed - Proper EU Transaction Handling</h3>
-            <p>This converter now correctly handles OSS transactions according to Minimax requirements. <strong>Important: Your Excel file must include a "Date due" column</strong> for proper invoice processing.</p>
-            <p style="margin-top: 10px;"><strong>🎯 Key Fix in v2.20:</strong> DDV section is now only included for domestic (Slovenian) transactions. EU transactions with OSS no longer have a DDV section, and all required OSS fields are properly placed in the VAT journal entry.</p>
+            <h3>✅ Version 2.21 - Added Clearing Account Entries</h3>
+            <p>This version now includes two additional clearing entries for each invoice: a credit entry to the receivables account and a debit entry to the clearing account (default 1652, configurable).</p>
+            <p style="margin-top: 10px;"><strong>🎯 Key Addition in v2.21:</strong> Two new journal entries are added for clearing purposes - offsetting the receivables account and posting to a configurable clearing account.</p>
             <div
                 style="margin-top: 12px; padding: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
-                <strong style="color: #16a34a;">🆕 Changes in v2.20:</strong>
+                <strong style="color: #16a34a;">🆕 Changes in v2.21:</strong>
                 <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                    <li><strong>OSS Structure Fix</strong> - DDV section removed for EU transactions</li>
-                    <li><strong>PredlozitevObracunaOSS</strong> - Added to all journal entries (N/D as appropriate)</li>
-                    <li><strong>EU VAT Account</strong> - Changed default from 26071 to 26002</li>
-                    <li><strong>Currency Fields</strong> - Added both foreign and domestic currency amounts</li>
-                    <li><strong>Additional OSS Field</strong> - Added ZnesekOsnoveVDenarniEnoti for OSS entries</li>
-                    <li>All v2.19 features retained: VAT detection, date formats, customer handling, etc.</li>
+                    <li><strong>Clearing Entries</strong> - Added 4th entry (receivables credit) and 5th entry (clearing account debit)</li>
+                    <li><strong>Configurable Clearing Account</strong> - New setting for clearing account (default: 1652)</li>
+                    <li>All v2.20 features retained: OSS structure fix, currency fields, VAT detection, etc.</li>
                 </ul>
             </div>
         </div>
@@ -454,6 +451,14 @@
                         <option value="goods">Goods (Blago)</option>
                         <option value="materials">Materials (Material)</option>
                     </select>
+                </div>
+
+                <div class="setting-item">
+                    <label for="clearingAccount">Clearing Account</label>
+                    <input type="text" id="clearingAccount" placeholder="1652" value="">
+                    <p style="font-size: 0.8rem; color: #718096; margin-top: 5px;">
+                        Account for clearing entry (default: 1652 if left empty)
+                    </p>
                 </div>
 
                 <div class="setting-item">
@@ -563,7 +568,7 @@
                     </div>
                 </div>
                 <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;">Revenue accounts automatically selected
-                    based on business type and customer country. DDV book entries only for domestic transactions.</p>
+                    based on business type and customer country. DDV book entries only for domestic transactions. Clearing account: <span id="clearingPreview">1652</span></p>
             </div>
 
             <div style="margin-top: 20px;">
@@ -646,33 +651,38 @@
 
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #718096; font-size: 0.85rem;">
-                <strong>Minimax XML Converter v2.20</strong> | Features: OSS Structure Fix + All v2.19 Features<br>
+                <strong>Minimax XML Converter v2.21</strong> | Features: Clearing Entries + OSS Structure Fix + All v2.19 Features<br>
+                <span style="color: #48bb78;">✓</span> Clearing account entries |
                 <span style="color: #48bb78;">✓</span> DDV only for domestic |
                 <span style="color: #48bb78;">✓</span> OSS fields in VAT entry |
                 <span style="color: #48bb78;">✓</span> EU VAT account 26002 |
                 <span style="color: #48bb78;">✓</span> All currency fields |
                 <span style="color: #48bb78;">✓</span> VAT auto-detection |
-                <span style="color: #48bb78;">✓</span> Date format selector |
-                <span style="color: #48bb78;">✓</span> Smart country detection |
-                <span style="color: #48bb78;">✓</span> Duplicate prevention
+                <span style="color: #48bb78;">✓</span> Smart country detection
             </p>
         </div>
     </div>
 
     <script>
         // Version information
-        console.log('Minimax XML Converter v2.20 loaded');
-        console.log('Features: OSS Structure Fix - DDV only for domestic, proper OSS fields placement');
+        console.log('Minimax XML Converter v2.21 loaded');
+        console.log('Features: Clearing entries added + OSS Structure Fix');
         console.log('Last updated: December 19, 2024');
 
         // Fixed timestamp when code was generated
         function updateTimestamp() {
-            const timestamp = "December 19, 2024 at 3:45 PM";
+            const timestamp = "December 19, 2024 at 4:30 PM";
             const timestampElement = document.getElementById('updateTimestamp');
             if (timestampElement) {
                 timestampElement.textContent = timestamp;
             }
         }
+
+        // Update clearing account preview when changed
+        document.getElementById('clearingAccount').addEventListener('input', function(e) {
+            const value = e.target.value.trim() || '1652';
+            document.getElementById('clearingPreview').textContent = value;
+        });
 
         // Standard EU VAT rates (as of 2025)
         const EU_VAT_RATES = {
@@ -739,7 +749,7 @@
         // Show version notification on load
         window.addEventListener('DOMContentLoaded', function () {
             updateTimestamp();
-            showMessage('✅ Minimax XML Converter v2.20 loaded - OSS structure fixed!', 'info');
+            showMessage('✅ Minimax XML Converter v2.21 loaded - Clearing entries added!', 'info');
         });
 
         let invoiceData = [];
@@ -1145,7 +1155,7 @@
                             }
                         });
 
-                        let message = `🎉 XML generated successfully! Created ${invoiceData.length} ${settings.invoiceType} records`;
+                        let message = `🎉 XML generated successfully! Created ${invoiceData.length} ${settings.invoiceType} records with clearing entries`;
 
                         if (settings.includeCustomers) {
                             const uniqueCustomers = new Map();
@@ -1191,7 +1201,8 @@
                 homeCountry: document.getElementById('homeCountry').value,
                 countryColumn: document.getElementById('countryColumn').value,
                 defaultVATRate: document.getElementById('defaultVATRate').value || 'S',
-                dateFormat: document.getElementById('dateFormat').value || 'auto'
+                dateFormat: document.getElementById('dateFormat').value || 'auto',
+                clearingAccount: document.getElementById('clearingAccount').value.trim() || '1652'
             };
 
             // Function to generate unique customer code
@@ -1241,7 +1252,7 @@
             }
 
             let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-            xml += '<!-- Generated by Minimax XML Converter v2.20 - OSS Structure Fix -->\n';
+            xml += '<!-- Generated by Minimax XML Converter v2.21 - With Clearing Entries -->\n';
             xml += '<miniMAXUvozKnjigovodstvo xmlns="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo" ';
             xml += 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
             xml += 'xsi:schemaLocation="https://moj.minimax.si/SI/CommonWeb/documents/schemas/miniMAXUvozKnjigovodstvo ';
@@ -1355,7 +1366,7 @@
 
                 // Debug for first record
                 if (index === 0) {
-                    console.log('=== Minimax XML Converter v2.20 Debug Info ===');
+                    console.log('=== Minimax XML Converter v2.21 Debug Info ===');
                     console.log('Account selection for first record:');
                     console.log('Customer:', row['Name']);
                     console.log('Customer code:', customerCode || 'Not included');
@@ -1367,6 +1378,7 @@
                     console.log('  Receivables:', accounts.receivables);
                     console.log('  Revenue:', accounts.revenue);
                     console.log('  VAT:', accounts.vat || 'No VAT');
+                    console.log('  Clearing:', settings.clearingAccount);
                     console.log('DDV segment:', countryType === 'domestic' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR' ? 'Will be included' : 'NOT included (EU/Third)');
                     console.log('OSS entry:', countryType === 'eu' && Math.abs(taxAmount) > 0.001 ? 'YES - in VAT entry' : 'No');
                     console.log('==========================================');
@@ -1429,7 +1441,7 @@
                 const invoiceDate = formatDate(row['Date'], settings.dateFormat);
                 const dueDate = formatDate(row['Date due'], settings.dateFormat); // Use the Date due column from Excel
 
-                // Receivables entry (debit) - with all currency fields
+                // 1. Receivables entry (debit) - with all currency fields
                 xml += '        <VrsticaTemeljnice>\n';
                 xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
                 xml += `          <OpisVrsticeTemeljnice>${documentPrefix} ${escapeXml(row['Number'] || '')} - ${escapeXml(row['Name'] || '')}</OpisVrsticeTemeljnice>\n`;
@@ -1451,7 +1463,7 @@
                 xml += '          <PredlozitevObracunaOSS>N</PredlozitevObracunaOSS>\n';
                 xml += '        </VrsticaTemeljnice>\n';
 
-                // Revenue entry (credit) - with all currency fields
+                // 2. Revenue entry (credit) - with all currency fields
                 xml += '        <VrsticaTemeljnice>\n';
                 xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
                 xml += `          <OpisVrsticeTemeljnice>Revenue - ${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
@@ -1465,7 +1477,7 @@
                 xml += '          <PredlozitevObracunaOSS>N</PredlozitevObracunaOSS>\n';
                 xml += '        </VrsticaTemeljnice>\n';
 
-                // VAT entry if applicable (credit) - with all currency fields and OSS fields for EU
+                // 3. VAT entry if applicable (credit) - with all currency fields and OSS fields for EU
                 if (Math.abs(taxAmount) > 0.001 && accounts.vat) {
                     xml += '        <VrsticaTemeljnice>\n';
                     xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
@@ -1528,6 +1540,38 @@
 
                     xml += '        </VrsticaTemeljnice>\n';
                 }
+
+                // 4. NEW: Receivables credit entry (offsetting)
+                xml += '        <VrsticaTemeljnice>\n';
+                xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
+                xml += `          <OpisVrsticeTemeljnice>${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
+                xml += `          <SifraKonta>${escapeXml(accounts.receivables)}</SifraKonta>\n`;
+                if (customerCode) {
+                    xml += `          <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
+                }
+                xml += '          <SifraDenarneEnote>EUR</SifraDenarneEnote>\n';
+                xml += '          <ZnesekVBremeVDenarniEnoti>0.00</ZnesekVBremeVDenarniEnoti>\n';
+                xml += `          <ZnesekVDobroVDenarniEnoti>${grossAmount.toFixed(2)}</ZnesekVDobroVDenarniEnoti>\n`;
+                xml += '          <ZnesekVBremeVDomaciDenarniEnoti>0.00</ZnesekVBremeVDomaciDenarniEnoti>\n';
+                xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${grossAmount.toFixed(2)}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
+                xml += '          <PredlozitevObracunaOSS>N</PredlozitevObracunaOSS>\n';
+                xml += '        </VrsticaTemeljnice>\n';
+
+                // 5. NEW: Clearing account debit entry
+                xml += '        <VrsticaTemeljnice>\n';
+                xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
+                xml += `          <OpisVrsticeTemeljnice>${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
+                xml += `          <SifraKonta>${escapeXml(settings.clearingAccount)}</SifraKonta>\n`;
+                if (customerCode) {
+                    xml += `          <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
+                }
+                xml += '          <SifraDenarneEnote>EUR</SifraDenarneEnote>\n';
+                xml += `          <ZnesekVBremeVDenarniEnoti>${grossAmount.toFixed(2)}</ZnesekVBremeVDenarniEnoti>\n`;
+                xml += '          <ZnesekVDobroVDenarniEnoti>0.00</ZnesekVDobroVDenarniEnoti>\n';
+                xml += `          <ZnesekVBremeVDomaciDenarniEnoti>${grossAmount.toFixed(2)}</ZnesekVBremeVDomaciDenarniEnoti>\n`;
+                xml += '          <ZnesekVDobroVDomaciDenarniEnoti>0.00</ZnesekVDobroVDomaciDenarniEnoti>\n';
+                xml += '          <PredlozitevObracunaOSS>N</PredlozitevObracunaOSS>\n';
+                xml += '        </VrsticaTemeljnice>\n';
 
                 xml += '      </VrsticeTemeljnice>\n';
                 xml += '    </Temeljnica>\n';
@@ -1864,7 +1908,7 @@
                 console.log('XML length:', generatedXML.length);
 
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = `minimax_invoices_v2.20_${timestamp}.xml`;
+                const filename = `minimax_invoices_v2.21_${timestamp}.xml`;
 
                 console.log('Attempting download with filename:', filename);
 
@@ -2011,7 +2055,7 @@
                         </button>
                     </div>
                     <div style="background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem;">
-                        <strong>📁 Save as:</strong> minimax_invoices_v2.20_${new Date().toISOString().split('T')[0]}.xml
+                        <strong>📁 Save as:</strong> minimax_invoices_v2.21_${new Date().toISOString().split('T')[0]}.xml
                     </div>
                     <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(generatedXML)}</pre>
                 `;
