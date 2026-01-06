@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utility Functions Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #48bb78;
+        }
+        .test.fail {
+            border-left-color: #c53030;
+        }
+        h2 {
+            color: #2d3748;
+        }
+        pre {
+            background: #f7fafc;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Utility Functions Test</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import { simpleHash } from './assets/js/utils/hash.js';
+        import { escapeXml, escapeHtml } from './assets/js/utils/xmlUtils.js';
+        import { validateFile, validateInvoiceData, validateSettings, validateAccountNumber } from './assets/js/utils/validators.js';
+
+        const results = document.getElementById('results');
+
+        function addTest(name, result, details) {
+            const div = document.createElement('div');
+            div.className = result ? 'test' : 'test fail';
+            div.innerHTML = `
+                <h2>${result ? '✅' : '❌'} ${name}</h2>
+                <pre>${details}</pre>
+            `;
+            results.appendChild(div);
+        }
+
+        // Test simpleHash
+        const hash1 = simpleHash('Test Customer');
+        const hash2 = simpleHash('Test Customer');
+        const hash3 = simpleHash('Different Customer');
+        addTest('simpleHash - Consistent',
+            hash1 === hash2,
+            `Same input produces same hash:\n  "${hash1}" === "${hash2}"`
+        );
+        addTest('simpleHash - Unique',
+            hash1 !== hash3,
+            `Different inputs produce different hashes:\n  "${hash1}" !== "${hash3}"`
+        );
+
+        // Test escapeXml
+        const xmlTest = escapeXml('Test & Co. <Company>');
+        addTest('escapeXml',
+            xmlTest === 'Test &amp; Co. &lt;Company&gt;',
+            `escapeXml('Test & Co. <Company>') =\n  "${xmlTest}"`
+        );
+
+        // Test escapeHtml
+        const htmlTest = escapeHtml('<script>alert("test")</script>');
+        addTest('escapeHtml',
+            htmlTest.includes('&lt;') && htmlTest.includes('&gt;'),
+            `escapeHtml('<script>alert("test")</script>') =\n  "${htmlTest}"`
+        );
+
+        // Test validateFile
+        const mockFile = { name: 'test.xlsx', size: 1024 };
+        const fileValidation = validateFile(mockFile);
+        addTest('validateFile - Valid',
+            fileValidation.valid === true,
+            `validateFile({name: 'test.xlsx', size: 1024}) =\n  ${JSON.stringify(fileValidation, null, 2)}`
+        );
+
+        const invalidFile = { name: 'test.pdf', size: 1024 };
+        const invalidValidation = validateFile(invalidFile);
+        addTest('validateFile - Invalid type',
+            invalidValidation.valid === false,
+            `validateFile({name: 'test.pdf'}) =\n  ${JSON.stringify(invalidValidation, null, 2)}`
+        );
+
+        // Test validateInvoiceData
+        const validData = [
+            { Name: 'Customer 1', Number: 'INV-001', Date: '2025-01-01', 'Date due': '2025-01-15', Total: 100, 'Total w/ tax': 122 }
+        ];
+        const dataValidation = validateInvoiceData(validData);
+        addTest('validateInvoiceData - Valid',
+            dataValidation.valid === true,
+            `Valid invoice data passes validation:\n  ${JSON.stringify(dataValidation, null, 2)}`
+        );
+
+        const invalidData = [
+            { Name: '', Number: 'INV-001' } // Missing required fields
+        ];
+        const invalidDataValidation = validateInvoiceData(invalidData);
+        addTest('validateInvoiceData - Invalid',
+            invalidDataValidation.valid === false,
+            `Invalid data detected:\n  ${JSON.stringify(invalidDataValidation, null, 2)}`
+        );
+
+        // Test validateSettings
+        const validSettings = {
+            invoiceType: 'IR',
+            businessType: 'products',
+            homeCountry: 'Slovenia',
+            dateFormat: 'auto'
+        };
+        const settingsValidation = validateSettings(validSettings);
+        addTest('validateSettings - Valid',
+            settingsValidation.valid === true,
+            `Valid settings pass validation:\n  ${JSON.stringify(settingsValidation, null, 2)}`
+        );
+
+        // Test validateAccountNumber
+        addTest('validateAccountNumber - Valid',
+            validateAccountNumber('1200') === true,
+            `validateAccountNumber('1200') = true`
+        );
+        addTest('validateAccountNumber - Invalid',
+            validateAccountNumber('ABCD') === false,
+            `validateAccountNumber('ABCD') = false (must be numeric)`
+        );
+
+        console.log('All tests complete! Check the page for results.');
+    </script>
+</body>
+</html>
