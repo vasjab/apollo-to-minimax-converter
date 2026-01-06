@@ -1348,15 +1348,40 @@
 
                 const accounts = getAccountsByCountryType(countryType, settings.businessType);
 
-                // Get country ISO code
+                // Get country ISO code with case-insensitive lookup
                 let countryISO = customerCountry;
 
                 // Check if it's already a 2-letter ISO code
                 if (customerCountry && customerCountry.length !== 2) {
-                    countryISO = COUNTRY_CODES[customerCountry] || customerCountry;
+                    // Case-insensitive lookup for country code
+                    const countryKey = Object.keys(COUNTRY_CODES).find(
+                        key => key.toLowerCase() === customerCountry.toLowerCase()
+                    );
+                    countryISO = countryKey ? COUNTRY_CODES[countryKey] : null;
+                    
+                    // If not found, log a warning
+                    if (!countryISO) {
+                        console.warn(`Row ${index + 1}: Could not find ISO code for country "${customerCountry}". Please check country name spelling.`);
+                    }
                 } else if (customerCountry && customerCountry.length === 2) {
                     // It's likely already an ISO code, uppercase it
                     countryISO = customerCountry.toUpperCase();
+                }
+
+                // Validate VAT rate matches expected rate for the country (if we have both)
+                if (countryISO && Math.abs(taxAmount) > 0.001 && netAmount !== 0) {
+                    const calculatedVatRate = Math.abs((taxAmount / netAmount) * 100);
+                    const expectedVatRate = EU_VAT_RATES[countryISO];
+                    
+                    if (expectedVatRate) {
+                        // Check if calculated rate matches expected rate (within 0.5% tolerance)
+                        const rateDifference = Math.abs(calculatedVatRate - expectedVatRate);
+                        if (rateDifference > 0.5) {
+                            console.warn(`Row ${index + 1}: VAT rate mismatch for ${customerCountry} (${countryISO}). Expected ${expectedVatRate}%, but calculated ${calculatedVatRate.toFixed(2)}%. Country will still be set to ${countryISO} based on country column.`);
+                        } else {
+                            console.log(`Row ${index + 1}: VAT rate ${calculatedVatRate.toFixed(2)}% matches expected rate ${expectedVatRate}% for ${customerCountry} (${countryISO}).`);
+                        }
+                    }
                 }
 
                 // Debug for first record
@@ -1489,12 +1514,24 @@
                     if (countryType === 'eu' && settings.invoiceType === 'IR') {
                         xml += '          <PredlozitevObracunaOSS>D</PredlozitevObracunaOSS>\n'; // D = Da (Yes)
 
-                        // Use ISO country code - ensure we have it
+                        // Use ISO country code - ensure we have it (always use country from column, not VAT rate)
                         if (countryISO && countryISO.length === 2) {
                             xml += `          <Drzava>${escapeXml(countryISO.toUpperCase())}</Drzava>\n`;
+                            console.log(`Row ${index + 1}: Setting Drzava to ${countryISO.toUpperCase()} for country "${customerCountry}" (from ${settings.countryColumn} column)`);
                         } else {
-                            // Fallback - try to get code from country name
-                            const code = COUNTRY_CODES[customerCountry] || 'EU';
+                            // Fallback - try case-insensitive lookup
+                            let code = 'EU';
+                            if (customerCountry) {
+                                const matchedKey = Object.keys(COUNTRY_CODES).find(
+                                    key => key.toLowerCase() === customerCountry.toLowerCase()
+                                );
+                                code = matchedKey ? COUNTRY_CODES[matchedKey] : COUNTRY_CODES[customerCountry] || 'EU';
+                                
+                                if (code === 'EU' && customerCountry) {
+                                    console.error(`Row ${index + 1}: ERROR - Could not find ISO code for country "${customerCountry}". Using EU as fallback. This may cause incorrect VAT attribution in Minimax.`);
+                                    console.error(`Row ${index + 1}: Available country names: ${Object.keys(COUNTRY_CODES).slice(0, 10).join(', ')}...`);
+                                }
+                            }
                             xml += `          <Drzava>${escapeXml(code)}</Drzava>\n`;
                         }
 
@@ -1609,7 +1646,13 @@
                 // Prefer shipping country, then billing country, then generic country
                 country = row['Shipping Country'] || row['Billing Country'] || row['Country'] || '';
             } else {
+                // Use the explicitly selected column
                 country = row[countryColumnSetting] || '';
+            }
+
+            // Trim whitespace to ensure clean country names
+            if (country) {
+                country = country.trim();
             }
 
             return country;
