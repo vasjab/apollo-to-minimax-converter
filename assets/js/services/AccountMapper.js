@@ -69,8 +69,7 @@ export function getAccountsByCountryType(countryType, businessType, overrides = 
 
 /**
  * Gets manual account overrides from DOM elements
- * This is a DOM-coupled helper function for backward compatibility
- * TODO: Move to UI layer when refactoring UI modules
+ * Used by SettingsUI to retrieve user-configured account numbers
  *
  * @returns {Object} Manual overrides object
  */
@@ -91,8 +90,7 @@ export function getManualOverrides() {
 /**
  * Updates the account preview in the UI
  * Shows example accounts for domestic, EU, and third country transactions
- * This is a DOM-coupled helper function for backward compatibility
- * TODO: Move to UI layer when refactoring UI modules
+ * Used by SettingsUI to display account mappings to users
  */
 export function updateAccountPreview() {
     const businessType = document.getElementById('businessType')?.value || 'products';

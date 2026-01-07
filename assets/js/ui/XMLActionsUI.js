@@ -13,28 +13,20 @@ import { showMessage, showError, showSuccess } from './MessageUI.js';
  */
 export function downloadXML(xmlContent) {
     try {
-        console.log('Download button clicked');
-
         if (!xmlContent || xmlContent.trim() === '') {
             showError('No XML to download. Please generate XML first.');
             return;
         }
 
-        console.log('XML length:', xmlContent.length);
-
         const timestamp = new Date().toISOString().split('T')[0];
         const filename = `minimax_invoices_v2.21_${timestamp}.xml`;
-
-        console.log('Attempting download with filename:', filename);
 
         // Method 1: Modern blob approach
         try {
             const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8' });
-            console.log('Blob created successfully');
 
             if (typeof URL !== 'undefined' && URL.createObjectURL) {
                 const url = URL.createObjectURL(blob);
-                console.log('Object URL created');
 
                 const a = document.createElement('a');
                 a.href = url;
@@ -42,7 +34,6 @@ export function downloadXML(xmlContent) {
                 a.style.display = 'none';
 
                 document.body.appendChild(a);
-                console.log('Triggering download');
                 a.click();
 
                 // Clean up
@@ -51,7 +42,6 @@ export function downloadXML(xmlContent) {
                         document.body.removeChild(a);
                     }
                     URL.revokeObjectURL(url);
-                    console.log('Download cleanup completed');
                 }, 1000);
 
                 showSuccess('🎉 XML file downloaded successfully!');
@@ -62,7 +52,6 @@ export function downloadXML(xmlContent) {
         }
 
         // Method 2: Data URI fallback
-        console.log('Trying data URI fallback method');
         const dataStr = 'data:application/xml;charset=utf-8,' + encodeURIComponent(xmlContent);
         const a = document.createElement('a');
         a.href = dataStr;
@@ -103,19 +92,15 @@ export function copyToClipboard(xmlContent) {
             return;
         }
 
-        console.log('Attempting to copy XML to clipboard, length:', xmlContent.length);
-
         // Try modern clipboard API first
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(xmlContent).then(() => {
                 showSuccess('✅ XML copied to clipboard successfully! Paste into text editor and save as .xml file.');
-                console.log('Copy successful via Clipboard API');
             }).catch(err => {
                 console.error('Clipboard API failed:', err);
                 fallbackCopyToClipboard(xmlContent);
             });
         } else {
-            console.log('Clipboard API not available, using fallback');
             fallbackCopyToClipboard(xmlContent);
         }
 

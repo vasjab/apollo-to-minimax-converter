@@ -22,8 +22,6 @@ export function detectVATRatesInHeaders(worksheet) {
     const XLSX = window.XLSX; // Access global XLSX from CDN
     const range = XLSX.utils.decode_range(worksheet['!ref']);
 
-    console.log('=== VAT Column Detection ===');
-
     // Scan header row (row 0)
     for (let col = range.s.c; col <= range.e.c; col++) {
         const headerCell = worksheet[XLSX.utils.encode_cell({ r: 0, c: col })];
@@ -39,13 +37,9 @@ export function detectVATRatesInHeaders(worksheet) {
                 const colLetter = XLSX.utils.encode_col(col);
                 const rate = parseFloat(vatMatch[1]);
                 vatRatesByColumn[colLetter] = rate;
-                console.log(`Found VAT rate in header "${headerText}" (column ${colLetter}): ${rate}%`);
             }
         }
     }
-
-    console.log(`Total VAT columns found: ${Object.keys(vatRatesByColumn).length}`);
-    console.log('========================');
 
     return vatRatesByColumn;
 }
@@ -102,9 +96,6 @@ export function mapVATRatesToRows(invoiceData, worksheet, vatRatesByColumn) {
                             rate: vatRatesByColumn[colLetter],
                             amount: cellValue
                         });
-
-                        const sign = cellValue < 0 ? '(negative) ' : '';
-                        console.log(`Row ${rowIndex + 1}: Found VAT amount ${sign}${Math.abs(cellValue).toFixed(2)} in column ${colLetter} with header rate ${vatRatesByColumn[colLetter]}%`);
                     }
                 }
             }
@@ -113,10 +104,6 @@ export function mapVATRatesToRows(invoiceData, worksheet, vatRatesByColumn) {
         // If we found VAT rates, use the first one
         if (vatRatesFound.length > 0) {
             row._vatRateFromHeader = vatRatesFound[0].rate;
-
-            if (vatRatesFound.length > 1) {
-                console.log(`Row ${rowIndex + 1}: Found ${vatRatesFound.length} potential VAT columns, using rate ${row._vatRateFromHeader}% from column ${vatRatesFound[0].column}`);
-            }
         }
 
         return row;

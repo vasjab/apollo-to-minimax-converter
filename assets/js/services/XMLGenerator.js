@@ -214,10 +214,10 @@ export function generateInvoiceEntry(row, index, settings, customerMap, columnHe
     // Validate VAT rate matches expected rate for the country
     validateVATRate(row, index, netAmount, taxAmount, countryISO, customerCountry);
 
-    // Debug for first record
-    if (index === 0) {
-        logDebugInfo(row, customerCode, customerCountry, countryISO, countryType, isCreditNote, accounts, settings, taxAmount);
-    }
+    // Debug for first record (uncomment for debugging)
+    // if (index === 0) {
+    //     logDebugInfo(row, customerCode, customerCountry, countryISO, countryType, isCreditNote, accounts, settings, taxAmount);
+    // }
 
     let xml = '    <Temeljnica>\n';
 
@@ -464,7 +464,6 @@ function generateOSSFields(row, index, netAmount, taxAmount, isCreditNote, count
     const dataVatRate = getVATRateFromData(row, columnHeaders);
     if (dataVatRate !== null) {
         vatPercent = dataVatRate;
-        console.log(`Row ${index + 1}: Using VAT rate from header: ${vatPercent}%`);
     } else {
         // Round to standard EU VAT rate
         vatPercent = roundToStandardVATRate(vatPercent, countryISO);
