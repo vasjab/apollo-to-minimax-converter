@@ -406,7 +406,7 @@ function generateRevenueEntry(row, invoiceDate, netAmount, isCreditNote, account
 
     const revenueAmount = isCreditNote ? netAmount.toFixed(2) : Math.abs(netAmount).toFixed(2);
     xml += `          <ZnesekVDobroVDenarniEnoti>${revenueAmount}</ZnesekVDobroVDenarniEnoti>\n`;
-    xml += '          <ZnesekVBremeVDomaciDenarniEnoti>0.00</ZnesekVBremeVDomaciDenarniEnoti>\n`;
+    xml += '          <ZnesekVBremeVDomaciDenarniEnoti>0.00</ZnesekVBremeVDomaciDenarniEnoti>\n';
     xml += `          <ZnesekVDobroVDomaciDenarniEnoti>${revenueAmount}</ZnesekVDobroVDomaciDenarniEnoti>\n`;
     xml += '          <PredlozitevObracunaOSS>N</PredlozitevObracunaOSS>\n';
     xml += '        </VrsticaTemeljnice>\n';
