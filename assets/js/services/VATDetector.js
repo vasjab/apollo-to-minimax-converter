@@ -8,6 +8,7 @@ import { EU_VAT_RATES } from '../config/constants.js';
 /**
  * Detects VAT rates from Excel worksheet headers
  * Searches for patterns like "20%", "VAT 21%", "Tax 19%", etc.
+ * Also detects decimal VAT rates like 0.22, 0.21 (Slovenian export format)
  *
  * @param {Object} worksheet - XLSX worksheet object
  * @returns {Object} Map of column letters to VAT rates (e.g., {'A': 20, 'C': 21})
@@ -26,15 +27,25 @@ export function detectVATRatesInHeaders(worksheet) {
     for (let col = range.s.c; col <= range.e.c; col++) {
         const headerCell = worksheet[XLSX.utils.encode_cell({ r: 0, c: col })];
 
-        if (headerCell && headerCell.v) {
-            const headerText = String(headerCell.v);
+        if (headerCell && headerCell.v !== undefined && headerCell.v !== null) {
+            const headerValue = headerCell.v;
+            const colLetter = XLSX.utils.encode_col(col);
 
-            // Check if header contains VAT percentage info
+            // Case 1: Numeric header that's a decimal VAT rate (e.g., 0.22, 0.21, 0.255)
+            // Common in Slovenian exports where headers are numbers like 0.22 instead of "22%"
+            if (typeof headerValue === 'number' && headerValue > 0 && headerValue < 1) {
+                const rate = Math.round(headerValue * 1000) / 10; // 0.22 → 22, 0.255 → 25.5
+                vatRatesByColumn[colLetter] = rate;
+                continue;
+            }
+
+            const headerText = String(headerValue);
+
+            // Case 2: String header with percentage info
             // Support various formats: "20%", "VAT 20%", "Tax 21%", "19% VAT", etc.
             const vatMatch = headerText.match(/(\d+(?:\.\d+)?)\s*%/);
 
             if (vatMatch) {
-                const colLetter = XLSX.utils.encode_col(col);
                 const rate = parseFloat(vatMatch[1]);
                 vatRatesByColumn[colLetter] = rate;
             }
@@ -62,14 +73,14 @@ export function mapVATRatesToRows(invoiceData, worksheet, vatRatesByColumn) {
     const range = XLSX.utils.decode_range(worksheet['!ref']);
 
     return invoiceData.map((row, rowIndex) => {
-        // Skip rows without essential data
-        if (!row['Name'] && !row['Total'] && !row['Total w/ tax']) {
+        // Skip rows without essential data (support both English and Slovenian column names)
+        if (!row['Name'] && !row['Naziv'] && !row['Total'] && !row['Skupaj'] && !row['Total w/ tax'] && !row['Skupaj z davkom']) {
             return row;
         }
 
-        // Calculate expected VAT from gross and net amounts
-        const grossAmount = parseFloat(row['Total w/ tax'] || 0);
-        const netAmount = parseFloat(row['Total'] || 0);
+        // Calculate expected VAT from gross and net amounts (support both column name formats)
+        const grossAmount = parseFloat(row['Total w/ tax'] || row['Skupaj z davkom'] || 0);
+        const netAmount = parseFloat(row['Total'] || row['Skupaj'] || 0);
         const calculatedVAT = grossAmount - netAmount;
 
         // Store all found VAT rates for this row
