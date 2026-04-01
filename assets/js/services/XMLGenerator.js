@@ -187,6 +187,11 @@ export function generateInvoiceEntry(row, index, settings, customerMap, columnHe
     const grossAmount = parseFloat(row['Total w/ tax'] || netAmount);
     const taxAmount = grossAmount - netAmount;
 
+    // Skip zero-amount invoices (Minimax rejects entries where both debit and credit are 0)
+    if (Math.abs(grossAmount) < 0.001 && Math.abs(netAmount) < 0.001) {
+        return '';
+    }
+
     // Get customer code from map if customers are included
     let customerCode = '';
     if (settings.includeCustomers && row['Name'] && customerMap.has(row['Name'])) {
