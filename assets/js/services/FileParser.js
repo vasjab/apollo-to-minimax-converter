@@ -105,9 +105,15 @@ export function parseCSV(file) {
                     return;
                 }
 
-                // CSV files don't have VAT rates in headers like Excel
                 // Normalize column names and values (handles Slovenian exports)
                 const normalizedData = normalizeData(results.data);
+
+                // Detect VAT rates from CSV column headers (e.g. "22%", "25%")
+                // and tag rows with the rate whose VAT-amount column matches
+                // grossAmount - netAmount. Without this, OSS falls back to math
+                // that breaks on mixed-rate invoices (e.g. when Total includes
+                // non-VAT items like shipping).
+                mapCSVVATRatesToRows(normalizedData);
 
                 resolve({
                     data: normalizedData,
@@ -179,6 +185,46 @@ export function parseExcel(file) {
         };
 
         reader.readAsArrayBuffer(file);
+    });
+}
+
+/**
+ * Detects VAT-rate columns in CSV headers and tags each row with the
+ * rate whose value matches that row's calculated VAT (gross - net).
+ * Mirrors the logic in VATDetector.mapVATRatesToRows but works on the
+ * already-parsed object array instead of an XLSX worksheet.
+ *
+ * @param {Array} rows - Parsed CSV rows (mutated in place: _vatRateFromHeader added)
+ */
+function mapCSVVATRatesToRows(rows) {
+    if (!rows || rows.length === 0) return;
+
+    const vatColumns = [];
+    Object.keys(rows[0]).forEach(key => {
+        const match = String(key).match(/^(\d+(?:\.\d+)?)\s*%$/);
+        if (match) {
+            vatColumns.push({ key, rate: parseFloat(match[1]) });
+        }
+    });
+
+    if (vatColumns.length === 0) return;
+
+    rows.forEach(row => {
+        const grossAmount = parseFloat(row['Total w/ tax']);
+        const netAmount = parseFloat(row['Total']);
+        if (isNaN(grossAmount) || isNaN(netAmount)) return;
+
+        const calculatedVAT = grossAmount - netAmount;
+        if (Math.abs(calculatedVAT) < 0.01) return;
+
+        for (const { key, rate } of vatColumns) {
+            const cellValue = parseFloat(row[key]);
+            if (!isNaN(cellValue) &&
+                Math.abs(Math.abs(cellValue) - Math.abs(calculatedVAT)) < 0.01) {
+                row._vatRateFromHeader = rate;
+                return;
+            }
+        }
     });
 }
 
