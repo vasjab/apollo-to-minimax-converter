@@ -384,7 +384,7 @@ function generateReceivablesDebitEntry(row, customerCode, invoiceDate, dueDate, 
     xml += `          <DatumOpravljanja>${invoiceDate}</DatumOpravljanja>\n`;
 
     if (row['Reference']) {
-        xml += `          <VezaZaPlacilo>${escapeXml(row['Reference'].substring(0, 30))}</VezaZaPlacilo>\n`;
+        xml += `          <VezaZaPlacilo>${escapeXml(String(row['Reference']).substring(0, 30))}</VezaZaPlacilo>\n`;
     }
 
     xml += '          <SifraDenarneEnote>EUR</SifraDenarneEnote>\n';
