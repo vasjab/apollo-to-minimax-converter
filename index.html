@@ -3,12 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minimax Invoice XML Converter v2.21 - With Clearing Entries</title>
 
-    <!-- External Dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Vendored dependencies (self-hosted: avoids CDN tampering, xlsx >= 0.20.2 fixes CVE-2023-30533 / CVE-2024-22363) -->
+    <script src="assets/vendor/papaparse.min.js"></script>
+    <script src="assets/vendor/xlsx.full.min.js"></script>
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/main.css">

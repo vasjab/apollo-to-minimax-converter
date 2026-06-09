@@ -43,7 +43,7 @@ export function generateCustomerCode(customer, index, settings) {
  */
 function generateHashCode(customer, settings) {
     if (customer.name) {
-        const hash = simpleHash(customer.name.trim().toUpperCase());
+        const hash = simpleHash(String(customer.name).trim().toUpperCase());
         // Add optional prefix
         return settings.customerCodePrefix ? settings.customerCodePrefix + hash : hash;
     }
@@ -64,10 +64,11 @@ function generateHashCode(customer, settings) {
  * @returns {string} Tax number code
  */
 function generateTaxNumberCode(customer, settings, index) {
-    // Use tax number if available
-    if (customer.taxNumber && customer.taxNumber.trim()) {
+    // Use tax number if available (coerce: purely numeric tax IDs parse as numbers)
+    const taxNumber = customer.taxNumber != null ? String(customer.taxNumber).trim() : '';
+    if (taxNumber) {
         // Remove common country prefixes like SI, AT, DE etc.
-        return customer.taxNumber.replace(/^[A-Z]{2}/i, '').trim();
+        return taxNumber.replace(/^[A-Z]{2}/i, '').trim();
     }
 
     // Fallback to name-based if no tax number
@@ -87,7 +88,7 @@ function generateTaxNumberCode(customer, settings, index) {
 function generateNameBasedCode(customer, settings, index) {
     // Create code from customer name (uppercase, no spaces, alphanumeric only)
     if (customer.name) {
-        const nameCode = customer.name
+        const nameCode = String(customer.name)
             .toUpperCase()
             .replace(/[^A-Z0-9]/g, '') // Remove non-alphanumeric
             .substring(0, 20); // Limit to 20 chars

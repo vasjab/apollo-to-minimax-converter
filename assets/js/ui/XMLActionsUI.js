@@ -166,7 +166,7 @@ export function togglePreview(xmlContent) {
         preview.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h3>📄 Generated XML Preview</h3>
-                <button class="btn btn-success" onclick="window.selectAllXMLContent()" style="margin: 0;">
+                <button class="btn btn-success" id="selectAllXMLBtn" style="margin: 0;">
                     <span>📋</span> Select All
                 </button>
             </div>
@@ -175,6 +175,8 @@ export function togglePreview(xmlContent) {
             </div>
             <pre id="xmlContent" style="user-select: all; cursor: text; background: #fff; border: 2px solid #667eea; max-height: 400px; overflow-y: auto;">${escapeHtml(xmlContent)}</pre>
         `;
+        // Attach via listener instead of inline onclick (blocked by CSP)
+        preview.querySelector('#selectAllXMLBtn').addEventListener('click', selectAllXMLContent);
         preview.classList.remove('hidden');
         toggleBtn.innerHTML = '<span>🙈</span> Hide Preview';
     } else {
@@ -224,9 +226,4 @@ export function hideActionButtons() {
     document.getElementById('copyBtn')?.classList.add('hidden');
     document.getElementById('previewToggle')?.classList.add('hidden');
     document.getElementById('downloadInfo')?.classList.add('hidden');
-}
-
-// Make selectAllXMLContent available globally for onclick handler
-if (typeof window !== 'undefined') {
-    window.selectAllXMLContent = selectAllXMLContent;
 }

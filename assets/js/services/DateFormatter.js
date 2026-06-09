@@ -10,10 +10,10 @@
  *
  * @param {number|string|Date} dateValue - Date to format (Excel serial, string, or Date object)
  * @param {string} [dateFormat='auto'] - Date format hint ('auto', 'dmy', 'mdy', 'ymd')
- * @returns {string} Date in YYYY-MM-DD format
+ * @returns {string|null} Date in YYYY-MM-DD format, or null if missing/unparseable
  */
 export function formatDate(dateValue, dateFormat = 'auto') {
-    if (!dateValue) return new Date().toISOString().split('T')[0];
+    if (!dateValue) return null;
 
     // Handle Excel date serial numbers
     if (typeof dateValue === 'number') {
@@ -30,8 +30,8 @@ export function formatDate(dateValue, dateFormat = 'auto') {
         return formatDateToISO(dateValue);
     }
 
-    // Fallback to current date
-    return new Date().toISOString().split('T')[0];
+    // Never substitute today's date - callers must handle invalid dates explicitly
+    return null;
 }
 
 /**
@@ -42,14 +42,13 @@ export function formatDate(dateValue, dateFormat = 'auto') {
  * @returns {string} Date in YYYY-MM-DD format
  */
 export function parseExcelSerialDate(serialDate) {
-    // Excel epoch is December 30, 1899
-    const excelEpoch = new Date(1899, 11, 30);
-    const date = new Date(excelEpoch.getTime() + serialDate * 24 * 60 * 60 * 1000);
+    // Use UTC arithmetic: local-time math shifts the result by an hour across
+    // DST transitions, which can move the date by a whole day
+    const date = new Date(Date.UTC(1899, 11, 30) + serialDate * 24 * 60 * 60 * 1000);
 
-    // Get the date components to avoid timezone issues
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
 }
@@ -60,7 +59,7 @@ export function parseExcelSerialDate(serialDate) {
  *
  * @param {string} dateString - Date string to parse
  * @param {string} [dateFormat='auto'] - Format hint ('auto', 'dmy', 'mdy', 'ymd')
- * @returns {string} Date in YYYY-MM-DD format
+ * @returns {string|null} Date in YYYY-MM-DD format, or null if unparseable
  */
 export function parseStringDate(dateString, dateFormat = 'auto') {
     let date;
@@ -133,8 +132,8 @@ export function parseStringDate(dateString, dateFormat = 'auto') {
         return formatDateToISO(date);
     }
 
-    // Fallback to current date
-    return new Date().toISOString().split('T')[0];
+    // Unparseable - let the caller decide how to handle it
+    return null;
 }
 
 /**
@@ -165,9 +164,10 @@ export function autoDetectFormat(firstNum, secondNum, thirdNum) {
         day = secondNum;
         year = thirdNum;
     } else {
-        // Ambiguous - default to MM/DD/YYYY for compatibility
-        month = firstNum;
-        day = secondNum;
+        // Ambiguous - default to DD/MM/YYYY (European exports are the
+        // common case for this tool)
+        day = firstNum;
+        month = secondNum;
         year = thirdNum;
     }
 

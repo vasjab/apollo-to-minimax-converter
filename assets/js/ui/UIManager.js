@@ -11,7 +11,8 @@ import * as MessageUI from './MessageUI.js';
 
 import { parseFile } from '../services/FileParser.js';
 import { generateXML } from '../services/XMLGenerator.js';
-import { classifyCountry } from '../services/CountryClassifier.js';
+import { classifyCountry, getCustomerCountry } from '../services/CountryClassifier.js';
+import { validateInvoiceData } from '../utils/validators.js';
 import InvoiceData from '../models/InvoiceData.js';
 import Settings from '../models/Settings.js';
 
@@ -62,6 +63,22 @@ async function handleFileSelect(file) {
 
         MessageUI.hideProcessing();
 
+        // Validate parsed data before accepting it
+        let qualityWarning = '';
+        const validation = validateInvoiceData(result.data);
+        if (!validation.valid) {
+            const columnErrors = validation.errors.filter(e => e.startsWith('Missing required column') || e.startsWith('No invoice data') || e.startsWith('Data must be'));
+            if (columnErrors.length > 0) {
+                // Structural problems: the file can't be processed at all
+                MessageUI.showError(`File validation failed: ${columnErrors.join('; ')}`);
+                return;
+            }
+            // Row-level data quality issues: warn but allow processing
+            const shown = validation.errors.slice(0, 3).join('; ');
+            const extra = validation.errors.length > 3 ? ` (and ${validation.errors.length - 3} more)` : '';
+            qualityWarning = ` ⚠️ Data quality warnings: ${shown}${extra}`;
+        }
+
         // Store parsed data
         InvoiceData.setData(result.data, result.vatRatesByColumn, result.columnHeaders);
 
@@ -72,8 +89,8 @@ async function handleFileSelect(file) {
         // Show settings panel
         SettingsUI.showSettings();
 
-        // Show success message
-        MessageUI.showSuccess(`✅ File loaded successfully! Found ${data.length} records.`);
+        // Show success message (with any data quality warnings)
+        MessageUI.showSuccess(`✅ File loaded successfully! Found ${data.length} records.${qualityWarning}`);
 
         // Reset XML generation state
         resetXMLState();
@@ -150,6 +167,9 @@ function handleGenerateXML() {
             try {
                 // Get current settings from UI
                 const settings = SettingsUI.getSettingsFromUI();
+
+                // Persist settings for the next session
+                Settings.updateMultiple(settings);
 
                 // Get column headers from InvoiceData
                 const columnHeaders = InvoiceData.getColumnHeaders();
@@ -234,26 +254,6 @@ function buildSuccessMessage(data, settings) {
     message += ` (${(generatedXML.length / 1024).toFixed(1)} KB)`;
 
     return message;
-}
-
-/**
- * Gets customer country from row data
- * Helper function matching XMLGenerator logic
- *
- * @param {Object} row - Invoice row data
- * @param {string} countryColumn - Country column setting
- * @returns {string} Customer country
- */
-function getCustomerCountry(row, countryColumn) {
-    if (countryColumn === 'auto') {
-        // Auto-detect: prefer "Country" column, fallback to "Country code"
-        return row['Country'] || row['Country code'] || 'Slovenia';
-    } else if (countryColumn === 'country') {
-        return row['Country'] || 'Slovenia';
-    } else if (countryColumn === 'countrycode') {
-        return row['Country code'] || 'SI';
-    }
-    return 'Slovenia'; // Default fallback
 }
 
 /**

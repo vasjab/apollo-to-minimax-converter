@@ -72,6 +72,8 @@ function generateCustomerMap(data, settings) {
         return customerMap;
     }
 
+    const usedCodes = new Set();
+
     data.forEach((row, index) => {
         const customerName = row['Name'];
         if (customerName && !customerMap.has(customerName)) {
@@ -86,7 +88,19 @@ function generateCustomerMap(data, settings) {
             };
 
             // Generate unique code for this customer
-            const customerCode = generateCustomerCode(customer, customerMap.size, settings);
+            let customerCode = generateCustomerCode(customer, customerMap.size, settings);
+
+            // Different names can hash/normalize to the same code; disambiguate
+            // so two customers are never merged under one code
+            if (usedCodes.has(customerCode)) {
+                let suffix = 2;
+                while (usedCodes.has(`${customerCode}-${suffix}`)) {
+                    suffix++;
+                }
+                console.warn(`Customer code collision for "${customerName}": "${customerCode}" already taken, using "${customerCode}-${suffix}"`);
+                customerCode = `${customerCode}-${suffix}`;
+            }
+            usedCodes.add(customerCode);
             customer.code = customerCode;
 
             customerMap.set(customerName, customer);
@@ -117,7 +131,7 @@ export function generateCustomersSection(customerMap) {
 
         if (customer.country) {
             // Convert country name to ISO code for better compatibility
-            let countryCode = customer.country;
+            let countryCode = String(customer.country);
 
             // Check if it's already a 2-letter code
             if (countryCode.length !== 2) {
@@ -187,9 +201,21 @@ export function generateInvoiceEntry(row, index, settings, customerMap, columnHe
     const grossAmount = parseFloat(row['Total w/ tax'] || netAmount);
     const taxAmount = grossAmount - netAmount;
 
+    // Reject non-numeric amounts instead of emitting "NaN" into the XML
+    if (isNaN(netAmount) || isNaN(grossAmount)) {
+        throw new Error(`Row ${index + 1} (${row['Number'] || 'no invoice number'}): ` +
+            `invalid amount - Total: "${row['Total']}", Total w/ tax: "${row['Total w/ tax']}"`);
+    }
+
     // Skip zero-amount invoices (Minimax rejects entries where both debit and credit are 0)
     if (Math.abs(grossAmount) < 0.001 && Math.abs(netAmount) < 0.001) {
         return '';
+    }
+
+    // Reject unparseable invoice dates instead of silently substituting today's date
+    if (!formatDate(row['Date'], settings.dateFormat)) {
+        throw new Error(`Row ${index + 1} (${row['Number'] || 'no invoice number'}): ` +
+            `invalid or missing "Date" value: "${row['Date'] ?? ''}"`);
     }
 
     // Get customer code from map if customers are included
@@ -211,7 +237,7 @@ export function generateInvoiceEntry(row, index, settings, customerMap, columnHe
         countryType = 'third';
     }
 
-    const accounts = getAccountsByCountryType(countryType, settings.businessType);
+    const accounts = getAccountsByCountryType(countryType, settings.businessType, settings.accountOverrides || null);
 
     // Get country ISO code with case-insensitive lookup
     let countryISO = getCountryISO(customerCountry);
@@ -293,9 +319,13 @@ export function generateDDVSection(row, index, customerCode, netAmount, taxAmoun
     xml += '          <DDVStopnje>\n';
     xml += '            <DDVStopnja>\n';
 
-    // Determine VAT rate code for DDV section
+    // Determine VAT rate code for DDV section: prefer the rate detected from
+    // the file headers, fall back to the configured default
     let vatRateCode = settings.defaultVATRate;
-    xml += `              <SifraStopnjeDDV>${vatRateCode}</SifraStopnjeDDV>\n`;
+    if (row._vatRateFromHeader !== undefined && row._vatRateFromHeader !== null) {
+        vatRateCode = mapSlovenianVATRateToCode(row._vatRateFromHeader) || vatRateCode;
+    }
+    xml += `              <SifraStopnjeDDV>${escapeXml(vatRateCode)}</SifraStopnjeDDV>\n`;
 
     // For services vs goods, use appropriate fields
     // For credit notes, keep negative values in DDV book
@@ -342,10 +372,11 @@ export function generateJournalEntries(row, index, customerCode, netAmount, gros
     let xml = '      <VrsticeTemeljnice>\n';
 
     const invoiceDate = formatDate(row['Date'], settings.dateFormat);
-    const dueDate = formatDate(row['Date due'], settings.dateFormat);
+    // Missing/unparseable due date falls back to the invoice date (already validated)
+    const dueDate = formatDate(row['Date due'], settings.dateFormat) || invoiceDate;
 
     // 1. Receivables entry (debit)
-    xml += generateReceivablesDebitEntry(row, customerCode, invoiceDate, dueDate, grossAmount, documentPrefix);
+    xml += generateReceivablesDebitEntry(row, customerCode, invoiceDate, dueDate, grossAmount, documentPrefix, accounts.receivables);
 
     // 2. Revenue entry (credit)
     xml += generateRevenueEntry(row, invoiceDate, netAmount, isCreditNote, accounts);
@@ -357,7 +388,7 @@ export function generateJournalEntries(row, index, customerCode, netAmount, gros
     }
 
     // 4. Receivables credit entry (offsetting) - v2.21
-    xml += generateReceivablesCreditEntry(row, customerCode, invoiceDate, grossAmount);
+    xml += generateReceivablesCreditEntry(row, customerCode, invoiceDate, grossAmount, accounts.receivables);
 
     // 5. Clearing account debit entry - v2.21
     xml += generateClearingEntry(row, customerCode, invoiceDate, grossAmount, settings);
@@ -370,11 +401,11 @@ export function generateJournalEntries(row, index, customerCode, netAmount, gros
 /**
  * Generates receivables debit entry
  */
-function generateReceivablesDebitEntry(row, customerCode, invoiceDate, dueDate, grossAmount, documentPrefix) {
+function generateReceivablesDebitEntry(row, customerCode, invoiceDate, dueDate, grossAmount, documentPrefix, receivablesAccount) {
     let xml = '        <VrsticaTemeljnice>\n';
     xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
     xml += `          <OpisVrsticeTemeljnice>${documentPrefix} ${escapeXml(row['Number'] || '')} - ${escapeXml(row['Name'] || '')}</OpisVrsticeTemeljnice>\n`;
-    xml += `          <SifraKonta>${escapeXml(row._receivablesAccount || '1200')}</SifraKonta>\n`;
+    xml += `          <SifraKonta>${escapeXml(receivablesAccount || '1200')}</SifraKonta>\n`;
 
     if (customerCode) {
         xml += `          <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
@@ -466,7 +497,7 @@ function generateOSSFields(row, index, netAmount, taxAmount, isCreditNote, count
     let vatPercent = netAmount !== 0 ? Math.abs((taxAmount / netAmount) * 100) : 0;
 
     // Try to get VAT rate from Excel headers first
-    const dataVatRate = getVATRateFromData(row, columnHeaders);
+    const dataVatRate = getVATRateFromData(row);
     if (dataVatRate !== null) {
         vatPercent = dataVatRate;
     } else {
@@ -492,11 +523,11 @@ function generateOSSFields(row, index, netAmount, taxAmount, isCreditNote, count
 /**
  * Generates receivables credit entry (offsetting) - v2.21
  */
-function generateReceivablesCreditEntry(row, customerCode, invoiceDate, grossAmount) {
+function generateReceivablesCreditEntry(row, customerCode, invoiceDate, grossAmount, receivablesAccount) {
     let xml = '        <VrsticaTemeljnice>\n';
     xml += `          <DatumKnjizbe>${invoiceDate}</DatumKnjizbe>\n`;
     xml += `          <OpisVrsticeTemeljnice>${escapeXml(row['Number'] || '')}</OpisVrsticeTemeljnice>\n`;
-    xml += `          <SifraKonta>${escapeXml(row._receivablesAccount || '1200')}</SifraKonta>\n`;
+    xml += `          <SifraKonta>${escapeXml(receivablesAccount || '1200')}</SifraKonta>\n`;
 
     if (customerCode) {
         xml += `          <SifraStranke>${escapeXml(customerCode)}</SifraStranke>\n`;
@@ -538,6 +569,20 @@ export function generateClearingEntry(row, customerCode, invoiceDate, grossAmoun
 }
 
 // Helper functions
+
+/**
+ * Maps a numeric Slovenian VAT rate to the Minimax rate code
+ *
+ * @param {number} rate - VAT rate percentage (e.g. 22, 9.5)
+ * @returns {string|null} Rate code ('S', 'Z', 'P', '0') or null if no match
+ */
+function mapSlovenianVATRateToCode(rate) {
+    if (Math.abs(rate - 22) < 0.01) return 'S';   // Standard
+    if (Math.abs(rate - 9.5) < 0.01) return 'Z';  // Reduced
+    if (Math.abs(rate - 5) < 0.01) return 'P';    // Special
+    if (Math.abs(rate) < 0.01) return '0';        // Zero
+    return null;
+}
 
 function getCountryISO(customerCountry) {
     if (!customerCountry) return null;

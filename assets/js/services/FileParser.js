@@ -97,12 +97,23 @@ export function parseCSV(file) {
 
         Papa.parse(file, {
             header: true,
-            dynamicTyping: true,
+            // Keep values as strings: dynamic typing turns invoice/tax numbers
+            // into numbers (losing leading zeros, risking scientific notation)
+            // and breaks code that expects strings. Amounts are parsed
+            // explicitly with parseFloat where needed.
+            dynamicTyping: false,
             skipEmptyLines: true,
             complete: function (results) {
-                if (results.errors.length > 0) {
-                    reject(new Error('Error parsing CSV: ' + results.errors[0].message));
+                // Only file-level errors (no row index) are fatal, e.g. an
+                // undetectable delimiter. Row-level issues like a field-count
+                // mismatch on one line shouldn't reject the whole file.
+                const fatalErrors = results.errors.filter(e => e.row === undefined || e.row === null);
+                if (fatalErrors.length > 0) {
+                    reject(new Error('Error parsing CSV: ' + fatalErrors[0].message));
                     return;
+                }
+                if (results.errors.length > 0) {
+                    console.warn(`CSV parsed with ${results.errors.length} row-level warning(s):`, results.errors);
                 }
 
                 // Normalize column names and values (handles Slovenian exports)

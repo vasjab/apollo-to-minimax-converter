@@ -10,12 +10,17 @@
  */
 export function showProcessing(message) {
     const messagesDiv = document.getElementById('messages');
-    messagesDiv.innerHTML = `
-        <div class="processing">
-            <div class="spinner"></div>
-            ${message}
-        </div>
-    `;
+    messagesDiv.innerHTML = '';
+
+    const processingDiv = document.createElement('div');
+    processingDiv.className = 'processing';
+
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+
+    processingDiv.appendChild(spinner);
+    processingDiv.appendChild(document.createTextNode(message));
+    messagesDiv.appendChild(processingDiv);
 }
 
 /**
@@ -41,7 +46,8 @@ export function showMessage(message, type) {
     messageDiv.className = `alert alert-${type}`;
 
     const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
-    messageDiv.innerHTML = `${icon} ${message}`;
+    // textContent: messages can embed file-derived text (e.g. parser errors)
+    messageDiv.textContent = `${icon} ${message}`;
 
     messagesDiv.innerHTML = '';
     messagesDiv.appendChild(messageDiv);

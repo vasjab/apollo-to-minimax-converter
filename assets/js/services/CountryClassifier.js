@@ -25,12 +25,12 @@ export function getCustomerCountry(row, countryColumnSetting = 'auto') {
         country = row[countryColumnSetting] || '';
     }
 
-    // Trim whitespace to ensure clean country names
+    // Coerce to string (cells may parse as numbers) and trim whitespace
     if (country) {
-        country = country.trim();
+        country = String(country).trim();
     }
 
-    return country;
+    return country || '';
 }
 
 /**

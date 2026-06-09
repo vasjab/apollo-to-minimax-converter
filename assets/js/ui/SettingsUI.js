@@ -3,7 +3,8 @@
  * Handles settings panel display and interactions
  */
 
-import { updateAccountPreview } from '../services/AccountMapper.js';
+import { updateAccountPreview, getManualOverrides } from '../services/AccountMapper.js';
+import Settings from '../models/Settings.js';
 
 /**
  * Shows the settings panel
@@ -12,6 +13,9 @@ import { updateAccountPreview } from '../services/AccountMapper.js';
 export function showSettings() {
     document.getElementById('settingsStep').classList.remove('hidden');
     document.getElementById('xmlStep').classList.remove('hidden');
+
+    // Restore persisted settings into the form
+    populateSettings(Settings.getAll());
 
     // Add event listeners for preview updates
     document.getElementById('businessType').addEventListener('change', updateAccountPreview);
@@ -102,7 +106,8 @@ export function getSettingsFromUI() {
         countryColumn: document.getElementById('countryColumn')?.value || 'auto',
         defaultVATRate: document.getElementById('defaultVATRate')?.value || 'S',
         dateFormat: document.getElementById('dateFormat')?.value || 'auto',
-        clearingAccount: document.getElementById('clearingAccount')?.value.trim() || '1652'
+        clearingAccount: document.getElementById('clearingAccount')?.value.trim() || '1652',
+        accountOverrides: getManualOverrides()
     };
 }
 
@@ -127,6 +132,7 @@ export function populateSettings(settings) {
     if (settings.includeCustomers !== undefined) {
         const elem = document.getElementById('includeCustomers');
         if (elem) elem.value = settings.includeCustomers.toString();
+        toggleCustomerOptions(settings.includeCustomers === true || settings.includeCustomers === 'true');
     }
 
     if (settings.customerCodePrefix) {
@@ -162,6 +168,14 @@ export function populateSettings(settings) {
     if (settings.clearingAccount) {
         const elem = document.getElementById('clearingAccount');
         if (elem) elem.value = settings.clearingAccount;
+    }
+
+    // Restore manual account override fields
+    if (settings.accountOverrides) {
+        Object.entries(settings.accountOverrides).forEach(([fieldId, value]) => {
+            const elem = document.getElementById(fieldId);
+            if (elem && value) elem.value = value;
+        });
     }
 
     // Update account preview after populating

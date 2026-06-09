@@ -3,6 +3,13 @@
 Date: 2026-06-09
 Scope: full application (client-side only, no backend). All JS/HTML files reviewed.
 
+> **Remediation status:** all findings below (S1-S3, B1-B14) have been fixed on this
+> branch in the commits following this report. Notable decisions: xlsx upgraded to 0.20.3
+> and self-hosted together with PapaParse under `assets/vendor/`; unparseable dates and
+> non-numeric amounts now abort generation with a row-numbered error instead of being
+> silently replaced; ambiguous dates now default to DD/MM/YYYY; CSV `dynamicTyping` was
+> disabled to preserve leading zeros and string types.
+
 ---
 
 ## Security issues
