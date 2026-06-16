@@ -256,7 +256,7 @@ export function generateInvoiceEntry(row, index, settings, customerMap, columnHe
     xml += generateInvoiceHeader(row, index, settings, documentPrefix);
 
     // Generate DDV section (only for domestic transactions with reportable VAT)
-    if (countryType === 'domestic' && isReportableVAT(netAmount, taxAmount) && settings.invoiceType === 'IR') {
+    if (countryType === 'domestic' && isReportableVAT(taxAmount) && settings.invoiceType === 'IR') {
         xml += generateDDVSection(row, index, customerCode, netAmount, taxAmount, isCreditNote, settings);
     }
 
@@ -380,7 +380,7 @@ export function generateJournalEntries(row, index, customerCode, netAmount, gros
     // rounding difference) is not reportable — both would otherwise leave the
     // entry unbalanced or produce an invalid 0% OSS line. When no VAT line is
     // emitted, revenue absorbs the full gross so debits and credits always match.
-    const vatEntryGenerated = isReportableVAT(netAmount, taxAmount) && !!accounts.vat;
+    const vatEntryGenerated = isReportableVAT(taxAmount) && !!accounts.vat;
     const revenueBase = vatEntryGenerated ? netAmount : grossAmount;
 
     // 1. Receivables entry (debit)
@@ -579,29 +579,26 @@ export function generateClearingEntry(row, customerCode, invoiceDate, grossAmoun
 // Helper functions
 
 /**
- * Minimum effective VAT rate (%) that is treated as a real VAT rate rather than
- * rounding noise. No EU/SI VAT rate is anywhere near this low (the lowest real
- * rate is France's 2.1% super-reduced), so this only catches data artifacts such
- * as a 1-cent gross/net difference. Such a line would otherwise produce an
- * invalid 0.00% OSS entry, which Minimax rejects ("Odstotek DDV is mandatory").
+ * Largest net/gross difference (in cents) treated as rounding noise rather than
+ * real VAT. A 1-cent difference can never be a real VAT rate: the lowest real EU
+ * rate (~2.1%) produces at least ~2 cents of VAT even on a €1 sale, so any rate
+ * that yields ≤ 1 cent is a rounding artifact (e.g. Croatia order net 28.26 /
+ * gross 28.27). Booking it as VAT would emit an invalid 0% OSS line, which
+ * Minimax rejects ("Odstotek DDV is mandatory").
  */
-const MIN_REPORTABLE_VAT_RATE = 1.0;
+const VAT_ROUNDING_CENTS = 1;
 
 /**
- * Whether a row's VAT is material enough to book a VAT line / DDV entry.
- * Requires a non-trivial tax amount AND an effective rate that corresponds to a
- * real VAT rate. Negligible tax (rounding noise) is folded into revenue instead,
+ * Whether a row's VAT is real or just cent-level rounding noise.
+ * The VAT amount is rounded to whole cents; a difference of {@link VAT_ROUNDING_CENTS}
+ * cent(s) or less is folded into revenue instead of producing a VAT/OSS/DDV line,
  * keeping the entry balanced and avoiding invalid 0% OSS lines.
  *
- * @param {number} netAmount - Net amount
  * @param {number} taxAmount - Tax amount (gross − net)
  * @returns {boolean} True if a VAT line should be generated
  */
-function isReportableVAT(netAmount, taxAmount) {
-    if (Math.abs(taxAmount) <= 0.001) return false;
-    if (!netAmount) return false;
-    const rate = Math.abs((taxAmount / netAmount) * 100);
-    return rate >= MIN_REPORTABLE_VAT_RATE;
+function isReportableVAT(taxAmount) {
+    return Math.round(Math.abs(taxAmount) * 100) > VAT_ROUNDING_CENTS;
 }
 
 /**

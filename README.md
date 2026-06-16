@@ -456,6 +456,7 @@ For issues or questions:
 ## Changelog
 
 ### Unreleased
+- ✅ **Cent-rounding of noise VAT**: a net/gross difference of one cent or less is treated as rounding (folded into revenue), not VAT — avoids invalid 0% OSS lines that Minimax rejects
 - ✅ **View XML mode**: import a generated Minimax XML and inspect it — all journal entries, per-country VAT breakdown, and a debit/credit balance check (flags unbalanced entries)
 - ✅ **Full-row data preview** (was first 5 rows) with Net / VAT / Gross totals
 - ✅ **VAT breakdown by country** shown as a preview right after the data table, exportable to CSV
