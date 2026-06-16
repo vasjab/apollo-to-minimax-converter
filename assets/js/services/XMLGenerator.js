@@ -375,14 +375,22 @@ export function generateJournalEntries(row, index, customerCode, netAmount, gros
     // Missing/unparseable due date falls back to the invoice date (already validated)
     const dueDate = formatDate(row['Date due'], settings.dateFormat) || invoiceDate;
 
+    // A VAT line is only emitted when there's tax AND a VAT account exists.
+    // Third countries have no VAT account, so any residual tax in the source
+    // (e.g. a non-EU order mistakenly charged VAT) would otherwise leave the
+    // entry unbalanced. When no VAT line is emitted, revenue absorbs the full
+    // gross so debits and credits always match.
+    const vatEntryGenerated = Math.abs(taxAmount) > 0.001 && !!accounts.vat;
+    const revenueBase = vatEntryGenerated ? netAmount : grossAmount;
+
     // 1. Receivables entry (debit)
     xml += generateReceivablesDebitEntry(row, customerCode, invoiceDate, dueDate, grossAmount, documentPrefix, accounts.receivables);
 
     // 2. Revenue entry (credit)
-    xml += generateRevenueEntry(row, invoiceDate, netAmount, isCreditNote, accounts);
+    xml += generateRevenueEntry(row, invoiceDate, revenueBase, isCreditNote, accounts);
 
     // 3. VAT entry if applicable (credit)
-    if (Math.abs(taxAmount) > 0.001 && accounts.vat) {
+    if (vatEntryGenerated) {
         xml += generateVATEntry(row, index, customerCode, invoiceDate, taxAmount, netAmount, isCreditNote,
                                accounts, countryType, countryISO, settings, columnHeaders);
     }

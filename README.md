@@ -2,15 +2,23 @@
 
 A professional, modular web application that converts invoice data from CSV/Excel files into Minimax-compatible XML format for import into Minimax accounting software.
 
+**Live app:** https://vasjab.github.io/apollo-to-minimax-converter/ (auto-deployed from `main` via GitHub Pages)
+
 ## Features
 
+- **Two modes**: **Generate XML** (CSV/Excel → Minimax XML) and **View XML** (import a generated XML and inspect it — all rows, VAT breakdown, debit/credit balance check)
 - **Multiple Input Formats**: Supports CSV and Excel (.xlsx, .xls) files
+- **Full data preview**: Shows every row of the uploaded file with a stats panel (Net, VAT, Gross)
+- **VAT breakdown by country**: Per-country net/VAT/gross summary with effective rate, exportable to CSV
 - **Smart VAT Detection**: Automatically detects VAT rates from column headers or calculates from amounts
 - **Country Classification**: Automatically classifies invoices as domestic, EU, or third-country
+- **Country-column guard**: If the selected country column is missing from the file, falls back to auto-detect with a visible warning (prevents mis-booking foreign customers as domestic)
 - **Customer Management**: Optional customer data export with flexible code generation strategies
 - **DDV (VAT Book) Entries**: Automatic generation for domestic Slovenian invoices
 - **OSS (One Stop Shop)**: Proper handling of EU cross-border VAT
 - **Clearing Entries**: Automatic generation of clearing account entries (v2.21 feature)
+- **Always-balanced journals**: When no VAT line applies (third country), revenue absorbs the gross so every entry balances
+- **Empty-row filtering**: Blank filler rows in exports are not counted or booked as invoices
 - **Multiple Export Options**: Download XML, copy to clipboard, or preview in browser
 - **Drag & Drop**: User-friendly file upload with drag-and-drop support
 - **Account Mapping**: Customizable account numbers for different business types and countries
@@ -46,18 +54,21 @@ minimax-converter/
 │       │   ├── InvoiceData.js         # Invoice data storage (singleton)
 │       │   └── Settings.js            # Settings state (singleton)
 │       ├── services/
-│       │   ├── FileParser.js          # CSV/Excel parsing
+│       │   ├── FileParser.js          # CSV/Excel parsing + empty-row filtering
 │       │   ├── VATDetector.js         # VAT rate detection
+│       │   ├── VATSummary.js          # Per-country VAT breakdown (from CSV/Excel)
 │       │   ├── CustomerCodeGenerator.js  # Customer code generation
-│       │   ├── CountryClassifier.js   # Country classification logic
+│       │   ├── CountryClassifier.js   # Country classification + column resolution
 │       │   ├── AccountMapper.js       # Account number mapping
 │       │   ├── DateFormatter.js       # Date parsing & formatting
-│       │   └── XMLGenerator.js        # Minimax XML generation
+│       │   ├── XMLGenerator.js        # Minimax XML generation
+│       │   └── XMLImporter.js         # Parse a generated XML back into a model
 │       ├── ui/
-│       │   ├── UIManager.js           # Master UI coordinator
+│       │   ├── UIManager.js           # Master UI coordinator + mode switch
 │       │   ├── FileUploadUI.js        # File upload interface
-│       │   ├── SettingsUI.js          # Settings panel
-│       │   ├── PreviewUI.js           # Data preview & stats
+│       │   ├── SettingsUI.js          # Settings panel + country-column guard
+│       │   ├── PreviewUI.js           # Data preview, stats & VAT breakdown
+│       │   ├── ViewXMLUI.js           # "View XML" mode (import & inspect)
 │       │   ├── XMLActionsUI.js        # Download/copy/preview
 │       │   └── MessageUI.js           # Alerts & messages
 │       └── utils/
@@ -443,6 +454,15 @@ For issues or questions:
 - **Target Software**: Minimax Accounting Software
 
 ## Changelog
+
+### Unreleased
+- ✅ **View XML mode**: import a generated Minimax XML and inspect it — all journal entries, per-country VAT breakdown, and a debit/credit balance check (flags unbalanced entries)
+- ✅ **Full-row data preview** (was first 5 rows) with Net / VAT / Gross totals
+- ✅ **VAT breakdown by country** shown as a preview right after the data table, exportable to CSV
+- ✅ **Country-column guard**: missing selected column → auto-detect fallback + visible warning; unavailable columns disabled in the dropdown
+- ✅ **Third-country balance fix**: revenue absorbs the gross when no VAT line applies, so entries with stray source VAT still balance
+- ✅ **Empty-row filtering**: blank filler rows are no longer counted or booked as invoices
+- ✅ **CI**: GitHub Actions workflow validates that all JS modules load
 
 ### v2.21 (December 2024) - Modular Refactor
 - ✅ Complete modular refactoring (21 modules)

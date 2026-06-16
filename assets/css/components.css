@@ -246,3 +246,167 @@ tbody tr:nth-child(even) {
     padding: 40px;
     color: #718096;
 }
+
+/* Full-row data table: taller scroll area than the default container */
+.table-container--full {
+    max-height: 480px;
+}
+
+/* Row-index column in the full data preview */
+td.row-idx,
+th.row-idx {
+    color: #a0aec0;
+    font-weight: 600;
+    text-align: right;
+    background: #f7fafc;
+    position: sticky;
+    left: 0;
+}
+
+.preview-note {
+    font-size: 0.8rem;
+    color: #718096;
+    margin: 10px 4px 0;
+    line-height: 1.5;
+}
+
+/* Inline warning under a setting (e.g. missing country column) */
+.inline-warning {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.inline-warning--error {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+}
+
+.inline-warning--info {
+    background: #ebf8ff;
+    border: 1px solid #90cdf4;
+    color: #2c5282;
+}
+
+/* VAT breakdown by country */
+.vat-breakdown {
+    margin-top: 28px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.vat-breakdown-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    background: #667eea;
+    padding: 8px 16px;
+    flex-wrap: wrap;
+}
+
+.vat-breakdown-head h3 {
+    color: white;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.vat-breakdown-head .btn {
+    margin: 0;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+.breakdown-table td.num,
+.breakdown-table th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.breakdown-table tr.breakdown-total td {
+    font-weight: 700;
+    background: #edf2f7;
+    border-top: 2px solid #cbd5e0;
+}
+
+/* Mode switch tabs (Generate XML / View XML) */
+.mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    background: #edf2f7;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+.mode-tab {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    color: #4a5568;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-tab:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.mode-tab.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* Balance indicators in the View XML summary */
+.balance-ok {
+    color: #2f855a;
+}
+
+.balance-bad {
+    color: #c53030;
+}
+
+tr.row-unbalanced td {
+    background: #fff5f5;
+}
+
+tr.row-unbalanced td.bal {
+    color: #c53030;
+    font-weight: 700;
+}
+
+/* Country-type badges */
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-domestic {
+    background: #c6f6d5;
+    color: #276749;
+}
+
+.badge-eu {
+    background: #bee3f8;
+    color: #2b6cb0;
+}
+
+.badge-third {
+    background: #feebc8;
+    color: #9c4221;
+}

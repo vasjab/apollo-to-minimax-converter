@@ -8,10 +8,11 @@ import * as SettingsUI from './SettingsUI.js';
 import * as PreviewUI from './PreviewUI.js';
 import * as XMLActionsUI from './XMLActionsUI.js';
 import * as MessageUI from './MessageUI.js';
+import * as ViewXMLUI from './ViewXMLUI.js';
 
 import { parseFile } from '../services/FileParser.js';
 import { generateXML } from '../services/XMLGenerator.js';
-import { classifyCountry, getCustomerCountry } from '../services/CountryClassifier.js';
+import { classifyCountry, getCustomerCountry, resolveCountryColumn } from '../services/CountryClassifier.js';
 import { validateInvoiceData } from '../utils/validators.js';
 import InvoiceData from '../models/InvoiceData.js';
 import Settings from '../models/Settings.js';
@@ -40,7 +41,72 @@ export function init() {
     // Initialize generate button handler
     setupGenerateButtonHandler();
 
+    // Live-refresh the country warning + VAT breakdown when country-relevant
+    // settings change. These selects exist at page load (just hidden).
+    setupCountrySettingHandlers();
+
+    // Initialize the "View XML" mode (import + inspect a generated XML)
+    ViewXMLUI.init();
+    setupModeSwitch();
+
     console.log('UI Manager initialized successfully');
+}
+
+/**
+ * Wires the Generate XML ⇄ View XML mode switch.
+ */
+function setupModeSwitch() {
+    const tabs = document.querySelectorAll('.mode-tab');
+    const modes = {
+        generate: document.getElementById('generateMode'),
+        view: document.getElementById('viewMode')
+    };
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const mode = tab.dataset.mode;
+            tabs.forEach(t => t.classList.toggle('active', t === tab));
+            Object.entries(modes).forEach(([name, el]) => {
+                if (el) el.classList.toggle('hidden', name !== mode);
+            });
+            MessageUI.clearMessages();
+        });
+    });
+}
+
+/**
+ * Wires change listeners on country-relevant settings so the inline warning
+ * and the per-country VAT breakdown update immediately.
+ */
+function setupCountrySettingHandlers() {
+    ['countryColumn', 'homeCountry'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', handleCountrySettingChange);
+    });
+}
+
+/**
+ * Handles a change to a country-relevant setting.
+ */
+function handleCountrySettingChange() {
+    const data = InvoiceData.getData();
+    if (!data || data.length === 0) return;
+
+    SettingsUI.updateCountryColumnWarning(data);
+    refreshVATBreakdown();
+}
+
+/**
+ * Recomputes and renders the per-country VAT breakdown using current settings,
+ * resolving the country column against the uploaded file first.
+ */
+function refreshVATBreakdown() {
+    const data = InvoiceData.getData();
+    if (!data || data.length === 0) return;
+
+    const settings = SettingsUI.getSettingsFromUI();
+    const resolution = resolveCountryColumn(settings.countryColumn, data);
+    PreviewUI.displayVATBreakdown(data, { ...settings, countryColumn: resolution.column });
 }
 
 /**
@@ -88,6 +154,12 @@ async function handleFileSelect(file) {
 
         // Show settings panel
         SettingsUI.showSettings();
+
+        // Reflect the file's available country columns in the dropdown + warning
+        SettingsUI.updateCountryColumnUI(data);
+
+        // Render the per-country VAT breakdown for the loaded data
+        refreshVATBreakdown();
 
         // Show success message (with any data quality warnings)
         MessageUI.showSuccess(`✅ File loaded successfully! Found ${data.length} records.${qualityWarning}`);
@@ -168,6 +240,20 @@ function handleGenerateXML() {
                 // Get current settings from UI
                 const settings = SettingsUI.getSettingsFromUI();
 
+                // Guard: if an explicit country column was chosen but isn't in
+                // this file, fall back to auto-detect instead of silently
+                // treating every foreign customer as domestic.
+                const resolution = resolveCountryColumn(settings.countryColumn, data);
+                let countryWarning = '';
+                if (resolution.fellBack) {
+                    settings.countryColumn = 'auto';
+                    countryWarning = ` ⚠️ Country column "${resolution.requested}" was not found in the file — ` +
+                        `used Auto-detect instead.`;
+                }
+                if (settings.countryColumn === 'auto' && !resolution.autoUsable) {
+                    countryWarning += ' ⚠️ No country column found — all customers booked as domestic; verify VAT.';
+                }
+
                 // Persist settings for the next session
                 Settings.updateMultiple(settings);
 
@@ -186,8 +272,11 @@ function handleGenerateXML() {
                 // Show XML action buttons
                 XMLActionsUI.showActionButtons();
 
+                // Keep the breakdown in sync with the column actually used
+                refreshVATBreakdown();
+
                 // Generate success message with statistics
-                const message = buildSuccessMessage(data, settings);
+                const message = buildSuccessMessage(data, settings) + countryWarning;
                 MessageUI.showSuccess(message);
 
             } catch (error) {

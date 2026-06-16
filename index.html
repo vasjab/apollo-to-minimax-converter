@@ -44,6 +44,15 @@
             </div>
         </div>
 
+        <!-- Mode switch -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="generate" type="button">🚀 Generate XML</button>
+            <button class="mode-tab" data-mode="view" type="button">🔎 View XML</button>
+        </div>
+
+        <!-- ===== Generate XML mode ===== -->
+        <div id="generateMode">
+
         <!-- Step 1: Upload File -->
         <div class="step">
             <h2>📁 Step 1: Upload Your Invoice Export</h2>
@@ -61,6 +70,7 @@
             </div>
             <div id="dataPreview" class="data-preview hidden"></div>
             <div id="dataStats" class="stats hidden"></div>
+            <div id="vatBreakdown" class="vat-breakdown hidden"></div>
         </div>
 
         <!-- Step 2: Settings -->
@@ -157,6 +167,7 @@
                         <option value="Shipping Country">Shipping Country</option>
                         <option value="Billing Country">Billing Country</option>
                     </select>
+                    <div id="countryColumnWarning" class="inline-warning hidden"></div>
                 </div>
 
                 <div class="setting-item">
@@ -280,6 +291,29 @@
             </div>
             <div id="xmlPreview" class="preview hidden"></div>
         </div>
+        </div>
+        <!-- ===== /Generate XML mode ===== -->
+
+        <!-- ===== View XML mode ===== -->
+        <div id="viewMode" class="hidden">
+            <div class="step">
+                <h2>🔎 Import &amp; View a Minimax XML</h2>
+                <p style="color: #718096; font-size: 0.9rem; margin-bottom: 20px;">
+                    Upload an XML you generated here to see what's inside it: every journal entry, a per-country
+                    VAT breakdown, and a debit/credit balance check.
+                </p>
+                <div class="file-upload" id="xmlUpload">
+                    <div class="file-upload-icon">📄</div>
+                    <div class="file-upload-text">Click or drag and drop a Minimax XML file here</div>
+                    <div class="file-upload-hint">Supports .xml files up to 60MB</div>
+                    <input type="file" id="xmlFile" accept=".xml" />
+                </div>
+                <div id="xmlStats" class="stats hidden"></div>
+                <div id="xmlData" class="data-preview hidden"></div>
+                <div id="xmlVatBreakdown" class="vat-breakdown hidden"></div>
+            </div>
+        </div>
+        <!-- ===== /View XML mode ===== -->
 
         <div id="messages"></div>
 
