@@ -94,6 +94,60 @@ export function getCountryISOCode(countryName) {
 }
 
 /**
+ * Country columns the UI lets the user choose from (besides 'auto').
+ * Kept in sync with the <select id="countryColumn"> options in index.html.
+ */
+export const SELECTABLE_COUNTRY_COLUMNS = ['Country', 'Shipping Country', 'Billing Country'];
+
+/**
+ * Columns 'auto' detection reads, in priority order.
+ */
+const AUTO_COUNTRY_COLUMNS = ['Shipping Country', 'Billing Country', 'Country'];
+
+/**
+ * Returns the subset of known country columns actually present in the data.
+ * Scans a sample of rows (not just the first) so a sparse first row can't
+ * hide a column that exists elsewhere.
+ *
+ * @param {Array} data - Parsed invoice rows
+ * @returns {string[]} Selectable country columns present in the file
+ */
+export function getAvailableCountryColumns(data) {
+    if (!Array.isArray(data) || data.length === 0) return [];
+
+    const keys = new Set();
+    const sample = data.slice(0, 25);
+    sample.forEach(row => {
+        if (row) Object.keys(row).forEach(k => keys.add(k));
+    });
+
+    return SELECTABLE_COUNTRY_COLUMNS.filter(col => keys.has(col));
+}
+
+/**
+ * Resolves the effective country column for a setting against the uploaded file.
+ *
+ * If an explicit column is selected but isn't present in the file, falls back
+ * to 'auto' and flags the fallback so callers can warn the user instead of
+ * silently treating every customer as domestic.
+ *
+ * @param {string} countryColumn - Configured value ('auto' or a column name)
+ * @param {Array} data - Parsed invoice rows
+ * @returns {{column: string, fellBack: boolean, requested: string, available: string[], autoUsable: boolean}}
+ */
+export function resolveCountryColumn(countryColumn, data) {
+    const requested = countryColumn || 'auto';
+    const available = getAvailableCountryColumns(data);
+    const autoUsable = AUTO_COUNTRY_COLUMNS.some(col => available.includes(col));
+
+    if (requested !== 'auto' && !available.includes(requested)) {
+        return { column: 'auto', fellBack: true, requested, available, autoUsable };
+    }
+
+    return { column: requested, fellBack: false, requested, available, autoUsable };
+}
+
+/**
  * Checks if a country is in the EU
  *
  * @param {string} country - Country name or ISO code

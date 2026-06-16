@@ -4,6 +4,7 @@
  */
 
 import { updateAccountPreview, getManualOverrides } from '../services/AccountMapper.js';
+import { getAvailableCountryColumns, SELECTABLE_COUNTRY_COLUMNS } from '../services/CountryClassifier.js';
 import Settings from '../models/Settings.js';
 
 /**
@@ -79,6 +80,76 @@ export function toggleCustomerOptions(show) {
 
     if (customerWarning) {
         customerWarning.style.display = display;
+    }
+}
+
+/**
+ * Reflects the uploaded file's available country columns in the Country Column
+ * dropdown: disables/annotates options that aren't present, and if the current
+ * selection is missing from the file, switches to Auto-detect. Then refreshes
+ * the inline warning. Call after a file is loaded (data available).
+ *
+ * @param {Array} data - Parsed invoice rows
+ */
+export function updateCountryColumnUI(data) {
+    const select = document.getElementById('countryColumn');
+    if (!select) return;
+
+    const available = getAvailableCountryColumns(data);
+
+    SELECTABLE_COUNTRY_COLUMNS.forEach(col => {
+        const option = Array.from(select.options).find(o => o.value === col);
+        if (!option) return;
+
+        const present = available.includes(col);
+        option.disabled = !present;
+        option.textContent = present ? col : `${col} (not in file)`;
+    });
+
+    // If the persisted/selected column isn't in this file, fall back to auto.
+    if (select.value !== 'auto' && !available.includes(select.value)) {
+        select.value = 'auto';
+        Settings.update('countryColumn', 'auto');
+    }
+
+    updateCountryColumnWarning(data);
+}
+
+/**
+ * Shows or hides the inline warning under the Country Column dropdown based on
+ * whether the current selection can actually be read from the uploaded file.
+ *
+ * @param {Array} data - Parsed invoice rows
+ */
+export function updateCountryColumnWarning(data) {
+    const warning = document.getElementById('countryColumnWarning');
+    const select = document.getElementById('countryColumn');
+    if (!warning || !select) return;
+
+    const available = getAvailableCountryColumns(data);
+    const selected = select.value;
+
+    let message = '';
+
+    if (selected !== 'auto' && !available.includes(selected)) {
+        // Should be rare (option is disabled), but guards manual/persisted values.
+        message = `⚠️ Column "${selected}" is not in this file. Conversion will fall back to ` +
+            `Auto-detect so foreign customers aren't mis-booked as domestic.`;
+    } else if (selected === 'auto' && available.length === 0) {
+        message = '⚠️ No country column (Country / Shipping Country / Billing Country) was found in this file. ' +
+            'Every customer will be treated as domestic — VAT may be wrong. Add a country column to the export.';
+    } else if (available.length > 0) {
+        message = `ℹ️ Country columns found in file: ${available.join(', ')}.`;
+    }
+
+    if (message) {
+        warning.textContent = message;
+        const isError = message.startsWith('⚠️');
+        warning.classList.toggle('inline-warning--error', isError);
+        warning.classList.toggle('inline-warning--info', !isError);
+        warning.classList.remove('hidden');
+    } else {
+        warning.classList.add('hidden');
     }
 }
 

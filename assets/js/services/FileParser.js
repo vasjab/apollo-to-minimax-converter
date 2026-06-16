@@ -116,8 +116,9 @@ export function parseCSV(file) {
                     console.warn(`CSV parsed with ${results.errors.length} row-level warning(s):`, results.errors);
                 }
 
-                // Normalize column names and values (handles Slovenian exports)
-                const normalizedData = normalizeData(results.data);
+                // Normalize column names and values (handles Slovenian exports),
+                // then drop filler/empty rows so they aren't counted as invoices.
+                const normalizedData = removeEmptyRows(normalizeData(results.data));
 
                 // Detect VAT rates from CSV column headers (e.g. "22%", "25%")
                 // and tag rows with the rate whose VAT-amount column matches
@@ -180,6 +181,9 @@ export function parseExcel(file) {
 
                 // Normalize column names and values (handles Slovenian exports)
                 invoiceData = normalizeData(invoiceData);
+
+                // Drop filler/empty rows so they aren't counted as invoices
+                invoiceData = removeEmptyRows(invoiceData);
 
                 resolve({
                     data: invoiceData,
@@ -305,6 +309,38 @@ function normalizeData(data) {
 
         return normalizedRow;
     });
+}
+
+/**
+ * Columns that identify a row as a real invoice. A row with none of these
+ * populated is treated as filler (e.g. an export's blank separator line that
+ * still carries a leading index number) and excluded from the dataset.
+ */
+const INVOICE_IDENTITY_COLUMNS = ['Number', 'Name', 'Type', 'Total', 'Total w/ tax'];
+
+/**
+ * Returns true if a row carries at least one invoice-identifying value.
+ *
+ * @param {Object} row - Parsed (normalized) invoice row
+ * @returns {boolean} True if the row represents an actual invoice
+ */
+function isInvoiceRow(row) {
+    if (!row) return false;
+    return INVOICE_IDENTITY_COLUMNS.some(col => {
+        const value = row[col];
+        return value !== undefined && value !== null && String(value).trim() !== '';
+    });
+}
+
+/**
+ * Removes empty/filler rows so they are not treated or counted as invoices.
+ *
+ * @param {Array} data - Parsed (normalized) invoice data
+ * @returns {Array} Data with empty rows removed
+ */
+function removeEmptyRows(data) {
+    if (!Array.isArray(data)) return data;
+    return data.filter(isInvoiceRow);
 }
 
 /**

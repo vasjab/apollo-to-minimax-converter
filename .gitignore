@@ -1,0 +1,10 @@
+# Claude Code local config (preview launch settings, worktrees)
+.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+
+# Temp files used for local testing
+__test_*
