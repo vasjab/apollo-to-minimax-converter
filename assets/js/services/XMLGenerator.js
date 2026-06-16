@@ -255,8 +255,8 @@ export function generateInvoiceEntry(row, index, settings, customerMap, columnHe
     // Generate header
     xml += generateInvoiceHeader(row, index, settings, documentPrefix);
 
-    // Generate DDV section (only for domestic transactions with VAT)
-    if (countryType === 'domestic' && Math.abs(taxAmount) > 0.001 && settings.invoiceType === 'IR') {
+    // Generate DDV section (only for domestic transactions with reportable VAT)
+    if (countryType === 'domestic' && isReportableVAT(netAmount, taxAmount) && settings.invoiceType === 'IR') {
         xml += generateDDVSection(row, index, customerCode, netAmount, taxAmount, isCreditNote, settings);
     }
 
@@ -375,12 +375,12 @@ export function generateJournalEntries(row, index, customerCode, netAmount, gros
     // Missing/unparseable due date falls back to the invoice date (already validated)
     const dueDate = formatDate(row['Date due'], settings.dateFormat) || invoiceDate;
 
-    // A VAT line is only emitted when there's tax AND a VAT account exists.
-    // Third countries have no VAT account, so any residual tax in the source
-    // (e.g. a non-EU order mistakenly charged VAT) would otherwise leave the
-    // entry unbalanced. When no VAT line is emitted, revenue absorbs the full
-    // gross so debits and credits always match.
-    const vatEntryGenerated = Math.abs(taxAmount) > 0.001 && !!accounts.vat;
+    // A VAT line is only emitted for reportable VAT AND when a VAT account exists.
+    // Third countries have no VAT account, and negligible "noise" VAT (a 1-cent
+    // rounding difference) is not reportable — both would otherwise leave the
+    // entry unbalanced or produce an invalid 0% OSS line. When no VAT line is
+    // emitted, revenue absorbs the full gross so debits and credits always match.
+    const vatEntryGenerated = isReportableVAT(netAmount, taxAmount) && !!accounts.vat;
     const revenueBase = vatEntryGenerated ? netAmount : grossAmount;
 
     // 1. Receivables entry (debit)
@@ -577,6 +577,32 @@ export function generateClearingEntry(row, customerCode, invoiceDate, grossAmoun
 }
 
 // Helper functions
+
+/**
+ * Minimum effective VAT rate (%) that is treated as a real VAT rate rather than
+ * rounding noise. No EU/SI VAT rate is anywhere near this low (the lowest real
+ * rate is France's 2.1% super-reduced), so this only catches data artifacts such
+ * as a 1-cent gross/net difference. Such a line would otherwise produce an
+ * invalid 0.00% OSS entry, which Minimax rejects ("Odstotek DDV is mandatory").
+ */
+const MIN_REPORTABLE_VAT_RATE = 1.0;
+
+/**
+ * Whether a row's VAT is material enough to book a VAT line / DDV entry.
+ * Requires a non-trivial tax amount AND an effective rate that corresponds to a
+ * real VAT rate. Negligible tax (rounding noise) is folded into revenue instead,
+ * keeping the entry balanced and avoiding invalid 0% OSS lines.
+ *
+ * @param {number} netAmount - Net amount
+ * @param {number} taxAmount - Tax amount (gross − net)
+ * @returns {boolean} True if a VAT line should be generated
+ */
+function isReportableVAT(netAmount, taxAmount) {
+    if (Math.abs(taxAmount) <= 0.001) return false;
+    if (!netAmount) return false;
+    const rate = Math.abs((taxAmount / netAmount) * 100);
+    return rate >= MIN_REPORTABLE_VAT_RATE;
+}
 
 /**
  * Maps a numeric Slovenian VAT rate to the Minimax rate code
